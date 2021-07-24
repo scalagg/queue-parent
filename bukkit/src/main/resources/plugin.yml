@@ -1,0 +1,8 @@
+name: queue-bukkit
+version: ${git.commit.id.abbrev}
+main: com.solexgames.queue.QueueBukkit
+
+author: SolexGames
+website: https://solexgames.com
+
+depend: [commonlibs-bukkit, Scandium]

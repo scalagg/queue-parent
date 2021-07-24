@@ -1,0 +1,8 @@
+name: queue-proxy
+version: ${git.commit.id.abbrev}
+main: com.solexgames.queue.QueueProxy
+
+author: SolexGames
+website: https://solexgames.com
+
+depend: [commonlibs-bukkit, Scandium]
