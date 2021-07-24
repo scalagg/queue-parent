@@ -1,0 +1,8 @@
+queues:
+  na-practice:
+    fancyName: "Queue One"
+    serverName: "queue-1"
+    children:
+      staff:
+        fancyName: "Staff"
+        priority: 1

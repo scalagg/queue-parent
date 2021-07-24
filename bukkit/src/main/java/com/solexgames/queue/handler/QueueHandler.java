@@ -4,9 +4,12 @@ import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.md_5.bungee.config.Configuration;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author GrowlyX
@@ -22,9 +25,9 @@ public class QueueHandler {
     private final Configuration configuration;
 
     public void loadQueuesFromConfiguration() {
-        final Configuration section = this.configuration.getSection("queues");
+        final ConfigurationSection section = this.configuration.getConfigurationSection("queues");
 
-        section.getKeys().forEach(key -> {
+        section.getKeys(false).forEach(key -> {
             final String configurationPrefix = "queues." + key + ".";
             final ParentQueue parentQueue = new ParentQueue(
                     key,
@@ -32,7 +35,7 @@ public class QueueHandler {
                     this.configuration.getString(configurationPrefix, "targetServer")
             );
 
-            final Collection<String> children = section.getSection(key + ".children").getKeys();
+            final Set<String> children = section.getConfigurationSection(key + ".children").getKeys(false);
 
             children.forEach(child -> {
                 final ChildQueue childQueue = new ChildQueue(parentQueue, this.configuration.getString(configurationPrefix + "children." + child + ".fancyName"));

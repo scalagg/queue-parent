@@ -6,7 +6,7 @@ public final class QueueProxy extends Plugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
+
     }
 
     @Override

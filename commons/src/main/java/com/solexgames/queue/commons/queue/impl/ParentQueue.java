@@ -4,13 +4,13 @@ import com.solexgames.queue.commons.model.QueuePlayer;
 import com.solexgames.queue.commons.queue.Queue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import com.solexgames.queue.commons.queue.impl.child.impl.DefaultChildQueue;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-import java.sql.PreparedStatement;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
+import java.util.TreeMap;
 
 /**
  * @author GrowlyX
@@ -21,7 +21,7 @@ import java.util.PriorityQueue;
 @RequiredArgsConstructor
 public class ParentQueue extends Queue {
 
-    private final Map<Integer, ChildQueue> children = new HashMap<>();
+    private final TreeMap<Integer, ChildQueue> children = new TreeMap<>();
 
     {
         this.children.put(0, new DefaultChildQueue(this));
@@ -37,6 +37,11 @@ public class ParentQueue extends Queue {
         return this.children.values().stream()
                 .filter(childQueue -> childQueue.isQueued(queuePlayer))
                 .findFirst();
+    }
+
+    public int getAllQueued() {
+        return this.children.values().stream()
+                .mapToInt(childQueue -> childQueue.getQueued().size()).sum();
     }
 
     @Override

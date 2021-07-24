@@ -7,6 +7,7 @@ import com.solexgames.lib.processor.config.ConfigFactory;
 import com.solexgames.queue.adapter.JedisAdapter;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.handler.PlayerHandler;
+import com.solexgames.queue.handler.QueueHandler;
 import me.lucko.helper.Events;
 import me.lucko.helper.plugin.ExtendedJavaPlugin;
 import org.bukkit.ChatColor;
@@ -16,6 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import lombok.Getter;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 
 /**
  * @author GrowlyX
@@ -29,6 +31,7 @@ public final class QueueBukkit extends ExtendedJavaPlugin {
     private static QueueBukkit instance;
 
     private PlayerHandler playerHandler;
+    private QueueHandler queueHandler;
 
     private JedisManager jedisManager;
 
@@ -36,8 +39,14 @@ public final class QueueBukkit extends ExtendedJavaPlugin {
     public void enable() {
         instance = this;
 
+        this.saveDefaultConfig();
         this.setupJedisManager();
+        this.setupQueueHandler();
         this.setupTasks();
+    }
+
+    private void setupQueueHandler() {
+        this.queueHandler = new QueueHandler(this.getConfig());
     }
 
     private void setupTasks() {
