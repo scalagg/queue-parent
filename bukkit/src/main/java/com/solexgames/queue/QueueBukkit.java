@@ -5,13 +5,17 @@ import com.solexgames.lib.commons.redis.JedisBuilder;
 import com.solexgames.lib.commons.redis.JedisManager;
 import com.solexgames.lib.processor.config.ConfigFactory;
 import com.solexgames.queue.adapter.JedisAdapter;
+import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.handler.PlayerHandler;
 import me.lucko.helper.Events;
 import me.lucko.helper.plugin.ExtendedJavaPlugin;
+import org.bukkit.ChatColor;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import lombok.Getter;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author GrowlyX
@@ -38,11 +42,35 @@ public final class QueueBukkit extends ExtendedJavaPlugin {
 
     private void setupTasks() {
         Events.subscribe(AsyncPlayerPreLoginEvent.class).handler(event -> {
+            final CompletableFuture<CachedQueuePlayer> completableFuture = this.playerHandler
+                    .fetchCachedDataFromRedis(event.getName(), event.getUniqueId());
 
+            completableFuture.whenComplete((queuePlayer, throwable) -> {
+                if (throwable != null) {
+                    throwable.printStackTrace();
+                }
+
+                if (queuePlayer != null) {
+                    this.playerHandler.getPlayerTypeMap().put(event.getUniqueId(), queuePlayer);
+                } else {
+                    event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, ChatColor.RED + "Something went wrong, please reconnect.");
+                }
+            });
         });
 
         Events.subscribe(PlayerQuitEvent.class).handler(event -> {
+            final CachedQueuePlayer queuePlayer = this.playerHandler.getByPlayer(event.getPlayer());
 
+            if (queuePlayer != null) {
+                final CompletableFuture<Void> completableFuture = this.playerHandler
+                        .updatePlayerDataToRedis(queuePlayer);
+
+                completableFuture.whenCompleteAsync((unused, throwable) -> {
+                    if (throwable != null) {
+                        throwable.printStackTrace();
+                    }
+                });
+            }
         });
     }
 
