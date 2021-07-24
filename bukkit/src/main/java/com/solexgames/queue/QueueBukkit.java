@@ -47,6 +47,7 @@ public final class QueueBukkit extends ExtendedJavaPlugin {
 
     private void setupQueueHandler() {
         this.queueHandler = new QueueHandler(this.getConfig());
+        this.queueHandler.loadQueuesFromConfiguration();
     }
 
     private void setupTasks() {

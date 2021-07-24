@@ -10,6 +10,6 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class QueueGlobalConstants {
 
-    public static final String JEDIS_KEY_PLAYER_CACHE = "queue_playerdata_cache";
+    public static final String JEDIS_KEY_PLAYER_CACHE = "queue_player_cache";
 
 }
