@@ -31,18 +31,13 @@ public class PlayerHandler extends BasicPlayerCache<CachedQueuePlayer> {
 
                 if (jedisValue != null) {
                     final CachedQueuePlayer queuePlayer = CorePlugin.GSON.fromJson(jedisValue, CachedQueuePlayer.class);
-                    System.out.println("Serialized value was found");
 
                     if (queuePlayer != null) {
                         atomicReference.set(queuePlayer);
-
-                        System.out.println("Cached queue player is being used");
                     }
                 } else {
                     final CachedQueuePlayer newQueuePlayer = new CachedQueuePlayer(name, uniqueId);
                     atomicReference.set(newQueuePlayer);
-
-                    System.out.println("New queue player is being used");
                 }
             });
 
@@ -56,8 +51,6 @@ public class PlayerHandler extends BasicPlayerCache<CachedQueuePlayer> {
 
             this.jedisManager.runCommand(jedis -> {
                 jedis.hset(QueueGlobalConstants.JEDIS_KEY_PLAYER_CACHE, queuePlayer.getUniqueId().toString(), serialized);
-
-                System.out.println("Updated jedis value");
             });
         });
     }
