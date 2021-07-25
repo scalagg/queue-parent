@@ -1,12 +1,15 @@
 package com.solexgames.queue.commons.queue.impl.child;
 
 import com.solexgames.queue.commons.model.QueuePlayer;
+import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.Queue;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Optional;
 import java.util.PriorityQueue;
+import java.util.UUID;
 
 /**
  * @author GrowlyX
@@ -20,11 +23,21 @@ public class ChildQueue extends Queue {
     private final ParentQueue parent;
 
     private final String name;
+    private final String permission;
 
-    private final PriorityQueue<QueuePlayer> queued = new PriorityQueue<>();
+    private final PriorityQueue<CachedQueuePlayer> queued = new PriorityQueue<>();
+
+    public int getAllQueued() {
+        return this.queued.size();
+    }
+
+    public Optional<CachedQueuePlayer> findQueuePlayerInChildQueue(UUID uuid) {
+        return this.queued.stream().filter(queuePlayer -> queuePlayer.getUniqueId().toString().equals(uuid.toString()))
+                .findFirst();
+    }
 
     @Override
-    public boolean isQueued(QueuePlayer queuePlayer) {
+    public boolean isQueued(CachedQueuePlayer queuePlayer) {
         return this.queued.contains(queuePlayer);
     }
 
@@ -34,8 +47,8 @@ public class ChildQueue extends Queue {
     }
 
     @Override
-    public int getPosition(QueuePlayer queuePlayer) {
-        final PriorityQueue<QueuePlayer> players = new PriorityQueue<>(this.queued);
+    public int getPosition(CachedQueuePlayer queuePlayer) {
+        final PriorityQueue<CachedQueuePlayer> players = new PriorityQueue<>(this.queued);
 
         for (int i = 0; i <= this.queued.size(); i++) {
             final QueuePlayer player = players.poll();

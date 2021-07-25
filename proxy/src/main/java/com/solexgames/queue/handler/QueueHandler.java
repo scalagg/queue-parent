@@ -29,13 +29,13 @@ public class QueueHandler {
             final ParentQueue parentQueue = new ParentQueue(
                     key,
                     this.configuration.getString(configurationPrefix + "fancyName"),
-                    this.configuration.getString(configurationPrefix, "targetServer")
+                    this.configuration.getString(configurationPrefix + "serverName")
             );
 
             final Collection<String> children = section.getSection(key + ".children").getKeys();
 
             children.forEach(child -> {
-                final ChildQueue childQueue = new ChildQueue(parentQueue, this.configuration.getString(configurationPrefix + "children." + child + ".fancyName"));
+                final ChildQueue childQueue = new ChildQueue(parentQueue, this.configuration.getString(configurationPrefix + "children." + child + ".fancyName"), this.configuration.getString(configurationPrefix + "children." + child + ".permission"));
                 parentQueue.getChildren().put(this.configuration.getInt(configurationPrefix + "children." + child + ".priority"), childQueue);
             });
 

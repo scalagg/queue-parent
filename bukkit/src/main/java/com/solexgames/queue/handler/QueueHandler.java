@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,13 +33,13 @@ public class QueueHandler {
             final ParentQueue parentQueue = new ParentQueue(
                     key,
                     this.configuration.getString(configurationPrefix + "fancyName"),
-                    this.configuration.getString(configurationPrefix, "targetServer")
+                    this.configuration.getString(configurationPrefix + "serverName")
             );
 
             final Set<String> children = section.getConfigurationSection(key + ".children").getKeys(false);
 
             children.forEach(child -> {
-                final ChildQueue childQueue = new ChildQueue(parentQueue, this.configuration.getString(configurationPrefix + "children." + child + ".fancyName"));
+                final ChildQueue childQueue = new ChildQueue(parentQueue, this.configuration.getString(configurationPrefix + "children." + child + ".fancyName"), this.configuration.getString(configurationPrefix + "children." + child + ".permission"));
                 parentQueue.getChildren().put(this.configuration.getInt(configurationPrefix + "children." + child + ".priority"), childQueue);
             });
 
@@ -46,5 +47,16 @@ public class QueueHandler {
 
             System.out.println("Loaded parent queue " + key + " with " + children.size() + " child queues.");
         });
+    }
+
+    public ChildQueue fetchBestChildQueue(ParentQueue parentQueue, Player player) {
+        for (ChildQueue value : parentQueue.getChildren().descendingMap().values()) {
+            if (value.getPermission() != null && player.hasPermission(value.getPermission())) {
+                return value;
+            }
+        }
+
+        // this should never be null
+        return parentQueue.getChildren().get(0);
     }
 }

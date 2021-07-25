@@ -1,11 +1,17 @@
 package com.solexgames.queue;
 
 import com.solexgames.core.CorePlugin;
+import com.solexgames.lib.acf.InvalidCommandArgument;
+import com.solexgames.lib.commons.processor.AcfCommandProcessor;
 import com.solexgames.lib.commons.redis.JedisBuilder;
 import com.solexgames.lib.commons.redis.JedisManager;
 import com.solexgames.lib.processor.config.ConfigFactory;
 import com.solexgames.queue.adapter.JedisAdapter;
+import com.solexgames.queue.command.JoinQueueCommand;
+import com.solexgames.queue.command.LeaveQueueCommand;
+import com.solexgames.queue.command.QueueSettingsCommand;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
+import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.handler.PlayerHandler;
 import com.solexgames.queue.handler.QueueHandler;
 import me.lucko.helper.Events;
@@ -34,6 +40,7 @@ public final class QueueBukkit extends ExtendedJavaPlugin {
     private QueueHandler queueHandler;
 
     private JedisManager jedisManager;
+    private JedisManager bungeeJedisManager;
 
     @Override
     public void enable() {
@@ -42,7 +49,27 @@ public final class QueueBukkit extends ExtendedJavaPlugin {
         this.saveDefaultConfig();
         this.setupJedisManager();
         this.setupQueueHandler();
+        this.setupCommandManager();
         this.setupTasks();
+    }
+
+    private void setupCommandManager() {
+        final AcfCommandProcessor processor = new AcfCommandProcessor(this);
+
+        processor.getCommandContexts().registerContext(ParentQueue.class, c -> {
+            final String firstArgument = c.getFirstArg();
+            final ParentQueue parentQueue = this.getQueueHandler().getParentQueueMap().get(firstArgument);
+
+            if (parentQueue == null) {
+                throw new InvalidCommandArgument("There is no queue named " + ChatColor.YELLOW + firstArgument + ChatColor.RED + ".");
+            }
+
+            return parentQueue;
+        });
+
+        processor.registerCommand(new JoinQueueCommand());
+        processor.registerCommand(new LeaveQueueCommand());
+        processor.registerCommand(new QueueSettingsCommand());
     }
 
     private void setupQueueHandler() {
@@ -90,12 +117,11 @@ public final class QueueBukkit extends ExtendedJavaPlugin {
                 .withHandler(new JedisAdapter())
                 .withSettings(CorePlugin.getInstance().getDefaultJedisSettings())
                 .build();
+        this.bungeeJedisManager = new JedisBuilder()
+                .withChannel("scandium:bungee")
+                .withSettings(CorePlugin.getInstance().getDefaultJedisSettings())
+                .build();
 
         this.playerHandler = new PlayerHandler(this.jedisManager);
-    }
-
-    @Override
-    public void disable() {
-
     }
 }

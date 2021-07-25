@@ -1,7 +1,6 @@
 package com.solexgames.queue.commons.model.impl;
 
 import com.solexgames.queue.commons.model.QueuePlayer;
-import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -13,7 +12,7 @@ import java.util.UUID;
  * @author GrowlyX
  * @since 7/24/2021
  * <p>
- * Cached playerdata with queue information
+ * Cached player-data with queue information
  */
 
 @Getter
@@ -23,6 +22,6 @@ public class CachedQueuePlayer extends QueuePlayer {
     private final String name;
     private final UUID uniqueId;
 
-    private final Map<String, ChildQueue> queueMap = new HashMap<>();
+    private final Map<String, String> queueMap = new HashMap<>();
 
 }

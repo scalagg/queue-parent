@@ -1,6 +1,7 @@
 package com.solexgames.queue.commons.queue.impl;
 
 import com.solexgames.queue.commons.model.QueuePlayer;
+import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.Queue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import com.solexgames.queue.commons.queue.impl.child.impl.DefaultChildQueue;
@@ -33,7 +34,13 @@ public class ParentQueue extends Queue {
 
     private boolean running = true;
 
-    public Optional<ChildQueue> getChildQueue(QueuePlayer queuePlayer) {
+    public Optional<ChildQueue> getChildQueue(String name) {
+        return this.children.values().stream()
+                .filter(childQueue -> childQueue.getName().equalsIgnoreCase(name))
+                .findFirst();
+    }
+
+    public Optional<ChildQueue> getChildQueue(CachedQueuePlayer queuePlayer) {
         return this.children.values().stream()
                 .filter(childQueue -> childQueue.isQueued(queuePlayer))
                 .findFirst();
@@ -45,17 +52,19 @@ public class ParentQueue extends Queue {
     }
 
     @Override
-    public boolean isQueued(QueuePlayer queuePlayer) {
+    public boolean isQueued(CachedQueuePlayer queuePlayer) {
         return this.getChildQueue(queuePlayer).orElse(null) != null;
     }
 
     @Override
-    public int getPosition(QueuePlayer queuePlayer) {
+    @Deprecated
+    public int getPosition(CachedQueuePlayer queuePlayer) {
         throw new RuntimeException("ParentQueue#getPosition is not supported, please use a child queue.");
     }
 
     @Override
-    public PriorityQueue<QueuePlayer> getQueued() {
+    @Deprecated
+    public PriorityQueue<CachedQueuePlayer> getQueued() {
         throw new RuntimeException("ParentQueue#getQueued is not supported, please use a child queue.");
     }
 }
