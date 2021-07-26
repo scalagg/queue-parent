@@ -66,15 +66,17 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
 
         final ScheduledExecutorService broadcast = Executors.newScheduledThreadPool(1);
         broadcast.scheduleAtFixedRate(() -> {
-            this.jedisManager.publish(
-                    new JsonAppender("QUEUE_BROADCAST_ALL")
-                            .getAsJson()
-            );
+            if (this.shouldBroadcast) {
+                this.jedisManager.publish(
+                        new JsonAppender("QUEUE_BROADCAST_ALL")
+                                .getAsJson()
+                );
+            }
         }, 0L, 5L, TimeUnit.SECONDS);
 
-        this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
-            final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-            executor.scheduleAtFixedRate(() -> {
+        final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        executor.scheduleAtFixedRate(() -> {
+            this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
                 if (parentQueue.getSetting("running")) {
                     final List<ChildQueue> sortedList = parentQueue.getSortedChildren();
 
@@ -94,8 +96,10 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
                         }
                     }
                 }
-            }, 0L, 10L, TimeUnit.MILLISECONDS);
+            });
+        }, 0L, 1L, TimeUnit.SECONDS);
 
+        this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
             QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
                 jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), CorePlugin.GSON.toJson(parentQueue.getSettings()));
             });
