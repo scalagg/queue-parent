@@ -4,14 +4,15 @@ import com.solexgames.queue.adapter.JedisAdapter;
 import com.solexgames.queue.adapter.XenonJedisAdapter;
 import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.logger.QueueLogger;
+import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.platform.QueuePlatform;
 import com.solexgames.queue.commons.platform.QueuePlatforms;
+import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import com.solexgames.queue.handler.QueueHandler;
-import com.solexgames.queue.task.QueueBroadcastThread;
-import com.solexgames.queue.task.QueueUpdateThread;
 import com.solexgames.xenon.CorePlugin;
 import com.solexgames.xenon.redis.JedisBuilder;
 import com.solexgames.xenon.redis.JedisManager;
+import com.solexgames.xenon.redis.json.JsonAppender;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -20,6 +21,10 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.File;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Getter
 public final class QueueProxy extends Plugin implements QueuePlatform {
@@ -59,10 +64,37 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
 
         QueuePlatforms.setPlatform(this);
 
-        new QueueBroadcastThread(this.jedisManager).start();
+        final ScheduledExecutorService broadcast = Executors.newScheduledThreadPool(1);
+        broadcast.scheduleAtFixedRate(() -> {
+            this.jedisManager.publish(
+                    new JsonAppender("QUEUE_BROADCAST_ALL")
+                            .getAsJson()
+            );
+        }, 0L, 5L, TimeUnit.SECONDS);
 
         this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
-            new QueueUpdateThread(parentQueue).start();
+            final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+            executor.scheduleAtFixedRate(() -> {
+                if (parentQueue.getSetting("running")) {
+                    final List<ChildQueue> sortedList = parentQueue.getSortedChildren();
+
+                    for (final ChildQueue childQueue : sortedList) {
+                        if (!childQueue.getQueued().isEmpty()) {
+                            final CachedQueuePlayer queuePlayer = childQueue.getQueued().poll();
+
+                            if (queuePlayer != null) {
+                                QueueProxy.getInstance().getJedisManager().publish(
+                                        new JsonAppender("QUEUE_SEND_PLAYER")
+                                                .put("PLAYER_ID", queuePlayer.getUniqueId().toString())
+                                                .put("PARENT", parentQueue.getName())
+                                                .put("CHILD", childQueue.getName())
+                                                .getAsJson()
+                                );
+                            }
+                        }
+                    }
+                }
+            }, 0L, 10L, TimeUnit.MILLISECONDS);
 
             QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
                 jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), CorePlugin.GSON.toJson(parentQueue.getSettings()));
