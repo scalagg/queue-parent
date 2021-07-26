@@ -42,8 +42,16 @@ public class JoinQueueCommand extends BaseCommand {
 
         final int queueAmount = queuePlayer.getQueueMap().size() + 1;
 
-        if (queueAmount > 2) {
-            throw new InvalidCommandArgument("You cannot join more than " + ChatColor.YELLOW + "2" + ChatColor.RED + " queues at a time.");
+        if (QueueBukkit.getInstance().getSettings().isAllowMultipleQueues()) {
+            if (queueAmount > 2) {
+                throw new InvalidCommandArgument("You cannot join more than " + ChatColor.YELLOW + "2" + ChatColor.RED + " queues at a time.");
+            }
+        } else {
+            if (queueAmount > 1) {
+                final String queueName = queuePlayer.getQueueMap().get(0);
+
+                throw new InvalidCommandArgument("You cannot join " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " as you're queued for " + ChatColor.YELLOW + queueName + ChatColor.RED + ".");
+            }
         }
 
         CompletableFuture.supplyAsync(() -> {

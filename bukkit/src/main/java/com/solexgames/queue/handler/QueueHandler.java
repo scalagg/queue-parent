@@ -12,7 +12,10 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author GrowlyX
@@ -20,7 +23,6 @@ import java.util.*;
  */
 
 @Getter
-@SuppressWarnings("all")
 @RequiredArgsConstructor
 public class QueueHandler {
 
@@ -65,7 +67,7 @@ public class QueueHandler {
                             final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(dataSplit[1]);
 
                             childQueueOptional.ifPresent(childQueue -> {
-                                childQueue.setQueued(CorePlugin.GSON.fromJson(s2, PriorityQueue.class));
+                                childQueue.setQueued(CorePlugin.GSON.fromJson(s2, QueueGlobalConstants.CACHED_QUEUE_PLAYER_TYPE));
                             });
                         }
                     } else {
@@ -83,7 +85,7 @@ public class QueueHandler {
                     final ParentQueue parentQueue = this.parentQueueMap.get(s);
 
                     if (parentQueue != null) {
-                        parentQueue.setSettings(CorePlugin.GSON.fromJson(s2, Map.class));
+                        parentQueue.setSettings(CorePlugin.GSON.fromJson(s2, QueueGlobalConstants.STRING_BOOLEAN_MAP_TYPE));
                     }
                 });
             }

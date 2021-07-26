@@ -28,7 +28,7 @@ public class JedisAdapter implements JedisHandler {
     private static final String[] QUEUE_LANE_CANNOT_JOIN_MESSAGE = new String[]{
             "",
             ChatColor.YELLOW + "<name> Queue Position: " + ChatColor.GOLD + "<position>" + ChatColor.YELLOW + "/" + ChatColor.GOLD + "<max>",
-            ChatColor.GRAY + ChatColor.ITALIC.toString() + "You're queued in the <child_name> lane.",
+            ChatColor.GRAY + ChatColor.ITALIC.toString() + "<other>",
             ChatColor.GRAY + ChatColor.ITALIC.toString() + "You can leave the queue by executing: /leavequeue",
             ChatColor.RED + "The server you're queued for is currently <server_status>.",
             "",
@@ -37,7 +37,7 @@ public class JedisAdapter implements JedisHandler {
     private static final String[] QUEUE_LANE_CAN_JOIN_MESSAGE = new String[]{
             "",
             ChatColor.YELLOW + "<name> Queue Position: " + ChatColor.GOLD + "<position>" + ChatColor.YELLOW + "/" + ChatColor.GOLD + "<max>",
-            ChatColor.GRAY + ChatColor.ITALIC.toString() + "You're in the <child_name> lane.",
+            ChatColor.GRAY + ChatColor.ITALIC.toString() + "<other>",
             ChatColor.GRAY + ChatColor.ITALIC.toString() + "You can leave the queue by executing: /leavequeue",
             "",
     };
@@ -146,23 +146,28 @@ public class JedisAdapter implements JedisHandler {
     public void onQueueBroadcast(JsonAppender jsonAppender) {
         QueueBukkit.getInstance().getQueueHandler().getParentQueueMap().values().forEach(parentQueue -> {
             parentQueue.getChildren().forEach((integer, childQueue) -> {
-                childQueue.getQueued().forEach(queuePlayer -> {
-                    final Player bukkitPlayer = Bukkit.getPlayer(queuePlayer.getUniqueId());
+                if (childQueue.getQueued() != null) {
+                    childQueue.getQueued().forEach(queuePlayer -> {
+                        final Player bukkitPlayer = Bukkit.getPlayer(queuePlayer.getUniqueId());
 
-                    if (bukkitPlayer != null) {
-                        final NetworkServer networkServer = NetworkServer.getByName(parentQueue.getTargetServer());
+                        if (bukkitPlayer != null) {
+                            final NetworkServer networkServer = NetworkServer.getByName(parentQueue.getTargetServer());
 
-                        if (networkServer == null) {
-                            this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, "offline");
-                        } else if (networkServer.isWhitelistEnabled()) {
-                            this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, "whitelisted");
-                        } else if (networkServer.getServerStatus().equals(NetworkServerStatusType.ONLINE)) {
-                            this.sendJoinable(bukkitPlayer, queuePlayer, childQueue);
-                        } else {
-                            this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, networkServer.getServerStatus().serverStatusString.toLowerCase());
+                            if (networkServer == null) {
+                                this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, "offline");
+                                return;
+                            }
+
+                            if (networkServer.isWhitelistEnabled()) {
+                                this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, "whitelisted");
+                            } else if (networkServer.getServerStatus().equals(NetworkServerStatusType.ONLINE)) {
+                                this.sendJoinable(bukkitPlayer, queuePlayer, childQueue);
+                            } else {
+                                this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, networkServer.getServerStatus().serverStatusString.toLowerCase());
+                            }
                         }
-                    }
-                });
+                    });
+                }
             });
         });
     }
@@ -173,7 +178,7 @@ public class JedisAdapter implements JedisHandler {
                     .replace("<name>", childQueue.getParent().getFancyName())
                     .replace("<position>", String.valueOf(childQueue.getPosition(queuePlayer)))
                     .replace("<max>", String.valueOf(childQueue.getAllQueued()))
-                    .replace("<child_name>", childQueue.getFancyName())
+                    .replace("<other>", (childQueue.getName().equals("normal") ? ChatColor.GRAY + ChatColor.ITALIC.toString() + "Want access to the fast pass? Purchase access at " + ChatColor.GOLD + "store.pvp.bar" + ChatColor.GRAY + ChatColor.ITALIC.toString() + "." : ChatColor.GRAY + ChatColor.ITALIC.toString() + "You're in the " + childQueue.getFancyName() + ChatColor.GRAY + ChatColor.ITALIC.toString() + " lane."))
                     .replace("<server_status>", status)
             );
         }
@@ -185,7 +190,7 @@ public class JedisAdapter implements JedisHandler {
                     .replace("<name>", childQueue.getParent().getFancyName())
                     .replace("<position>", String.valueOf(childQueue.getPosition(queuePlayer)))
                     .replace("<max>", String.valueOf(childQueue.getAllQueued()))
-                    .replace("<child_name>", childQueue.getFancyName())
+                    .replace("<other>", (childQueue.getName().equals("normal") ? ChatColor.GRAY + ChatColor.ITALIC.toString() + "Want access to the fast pass? Purchase access at " + ChatColor.GOLD + "store.pvp.bar" + ChatColor.GRAY + ChatColor.ITALIC.toString() + "." : ChatColor.GRAY + ChatColor.ITALIC.toString() + "You're in the " + childQueue.getFancyName() + ChatColor.GRAY + ChatColor.ITALIC.toString() + " lane."))
             );
         }
     }

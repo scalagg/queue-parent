@@ -5,6 +5,7 @@ import com.solexgames.lib.acf.InvalidCommandArgument;
 import com.solexgames.lib.commons.processor.AcfCommandProcessor;
 import com.solexgames.lib.commons.redis.JedisBuilder;
 import com.solexgames.lib.commons.redis.JedisManager;
+import com.solexgames.lib.processor.config.ConfigFactory;
 import com.solexgames.queue.adapter.JedisAdapter;
 import com.solexgames.queue.command.JoinQueueCommand;
 import com.solexgames.queue.command.LeaveQueueCommand;
@@ -15,6 +16,7 @@ import com.solexgames.queue.commons.platform.QueuePlatforms;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.handler.PlayerHandler;
 import com.solexgames.queue.handler.QueueHandler;
+import com.solexgames.queue.internal.QueueBukkitSettings;
 import me.lucko.helper.Events;
 import me.lucko.helper.plugin.ExtendedJavaPlugin;
 import org.bukkit.ChatColor;
@@ -36,16 +38,22 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
     private static QueueBukkit instance;
 
     private PlayerHandler playerHandler;
+
     private QueueHandler queueHandler;
+    private QueueBukkitSettings settings;
 
     private JedisManager jedisManager;
     private JedisManager bungeeJedisManager;
+
+    private final ConfigFactory factory = ConfigFactory.newFactory(this);
 
     @Override
     public void enable() {
         instance = this;
 
         QueuePlatforms.setPlatform(this);
+
+        this.settings = this.factory.fromFile("settings", QueueBukkitSettings.class);
 
         this.saveDefaultConfig();
         this.setupJedisManager();
