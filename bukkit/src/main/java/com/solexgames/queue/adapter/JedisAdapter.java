@@ -28,7 +28,7 @@ public class JedisAdapter implements JedisHandler {
     private static final String[] QUEUE_LANE_CANNOT_JOIN_MESSAGE = new String[]{
             "",
             ChatColor.YELLOW + "<name> Queue Position: " + ChatColor.GOLD + "<position>" + ChatColor.YELLOW + "/" + ChatColor.GOLD + "<max>",
-            ChatColor.GRAY + ChatColor.ITALIC.toString() + "You're in the <child_name> lane.",
+            ChatColor.GRAY + ChatColor.ITALIC.toString() + "You're queued in the <child_name> lane.",
             ChatColor.GRAY + ChatColor.ITALIC.toString() + "You can leave the queue by executing: /leavequeue",
             ChatColor.RED + "The server you're queued for is currently <server_status>.",
             "",
