@@ -5,12 +5,13 @@ import com.solexgames.lib.acf.InvalidCommandArgument;
 import com.solexgames.lib.commons.processor.AcfCommandProcessor;
 import com.solexgames.lib.commons.redis.JedisBuilder;
 import com.solexgames.lib.commons.redis.JedisManager;
-import com.solexgames.lib.processor.config.ConfigFactory;
 import com.solexgames.queue.adapter.JedisAdapter;
 import com.solexgames.queue.command.JoinQueueCommand;
 import com.solexgames.queue.command.LeaveQueueCommand;
-import com.solexgames.queue.command.QueueSettingsCommand;
+import com.solexgames.queue.command.QueueMetaCommand;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
+import com.solexgames.queue.commons.platform.QueuePlatform;
+import com.solexgames.queue.commons.platform.QueuePlatforms;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.handler.PlayerHandler;
 import com.solexgames.queue.handler.QueueHandler;
@@ -19,11 +20,9 @@ import me.lucko.helper.plugin.ExtendedJavaPlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 import lombok.Getter;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Logger;
 
 /**
  * @author GrowlyX
@@ -31,7 +30,7 @@ import java.util.logging.Logger;
  */
 
 @Getter
-public final class QueueBukkit extends ExtendedJavaPlugin {
+public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatform {
 
     @Getter
     private static QueueBukkit instance;
@@ -45,6 +44,8 @@ public final class QueueBukkit extends ExtendedJavaPlugin {
     @Override
     public void enable() {
         instance = this;
+
+        QueuePlatforms.setPlatform(this);
 
         this.saveDefaultConfig();
         this.setupJedisManager();
@@ -69,7 +70,7 @@ public final class QueueBukkit extends ExtendedJavaPlugin {
 
         processor.registerCommand(new JoinQueueCommand());
         processor.registerCommand(new LeaveQueueCommand());
-        processor.registerCommand(new QueueSettingsCommand());
+        processor.registerCommand(new QueueMetaCommand());
     }
 
     private void setupQueueHandler() {

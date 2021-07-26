@@ -4,9 +4,7 @@ import com.solexgames.queue.commons.model.QueuePlayer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author GrowlyX
@@ -22,6 +20,6 @@ public class CachedQueuePlayer extends QueuePlayer {
     private final String name;
     private final UUID uniqueId;
 
-    private final Map<String, String> queueMap = new HashMap<>();
+    private final List<String> queueMap = new ArrayList<>();
 
 }

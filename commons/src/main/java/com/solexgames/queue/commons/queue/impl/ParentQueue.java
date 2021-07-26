@@ -9,9 +9,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author GrowlyX
@@ -22,7 +21,7 @@ import java.util.TreeMap;
 @RequiredArgsConstructor
 public class ParentQueue extends Queue {
 
-    private final TreeMap<Integer, ChildQueue> children = new TreeMap<>();
+    private final Map<Integer, ChildQueue> children = new HashMap<>();
 
     {
         this.children.put(0, new DefaultChildQueue(this));
@@ -32,7 +31,21 @@ public class ParentQueue extends Queue {
     private final String fancyName;
     private final String targetServer;
 
-    private boolean running = true;
+    private Map<String, Boolean> settings = new HashMap<>();
+
+    {
+        this.settings.put("running", true);
+    }
+
+    public boolean getSetting(String key) {
+        return this.settings.getOrDefault(key, false);
+    }
+
+    public List<ChildQueue> getSortedChildren() {
+        return this.children.entrySet().stream()
+                .sorted(Comparator.comparingInt(Map.Entry::getKey))
+                .map(Map.Entry::getValue).collect(Collectors.toList());
+    }
 
     public Optional<ChildQueue> getChildQueue(String name) {
         return this.children.values().stream()

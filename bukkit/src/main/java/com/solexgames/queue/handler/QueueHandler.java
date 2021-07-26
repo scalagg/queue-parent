@@ -1,5 +1,8 @@
 package com.solexgames.queue.handler;
 
+import com.solexgames.core.CorePlugin;
+import com.solexgames.queue.QueueBukkit;
+import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import lombok.Getter;
@@ -8,9 +11,7 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author GrowlyX
@@ -18,6 +19,7 @@ import java.util.Set;
  */
 
 @Getter
+@SuppressWarnings("all")
 @RequiredArgsConstructor
 public class QueueHandler {
 
@@ -39,7 +41,7 @@ public class QueueHandler {
             final Set<String> children = section.getConfigurationSection(key + ".children").getKeys(false);
 
             children.forEach(child -> {
-                final ChildQueue childQueue = new ChildQueue(parentQueue, this.configuration.getString(configurationPrefix + "children." + child + ".fancyName"), this.configuration.getString(configurationPrefix + "children." + child + ".permission"));
+                final ChildQueue childQueue = new ChildQueue(parentQueue, child, this.configuration.getString(configurationPrefix + "children." + child + ".fancyName"), this.configuration.getString(configurationPrefix + "children." + child + ".permission"));
                 parentQueue.getChildren().put(this.configuration.getInt(configurationPrefix + "children." + child + ".priority"), childQueue);
             });
 
@@ -47,16 +49,45 @@ public class QueueHandler {
 
             System.out.println("Loaded parent queue " + key + " with " + children.size() + " child queues.");
         });
+
+        QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
+            final Map<String, String> jedisValues = jedis.hgetAll(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE);
+
+            jedisValues.forEach((s, s2) -> {
+                final String[] dataSplit = s.split(":");
+                final ParentQueue parentQueue = this.parentQueueMap.get(dataSplit[0]);
+
+                if (parentQueue != null) {
+                    final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(dataSplit[1]);
+
+                    childQueueOptional.ifPresent(childQueue -> {
+                        childQueue.setQueued(CorePlugin.GSON.fromJson(s2, PriorityQueue.class));
+                    });
+                }
+            });
+        });
+
+        QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
+            final Map<String, String> jedisValues = jedis.hgetAll(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE);
+
+            jedisValues.forEach((s, s2) -> {
+                final ParentQueue parentQueue = this.parentQueueMap.get(s);
+
+                if (parentQueue != null) {
+                    parentQueue.setSettings(CorePlugin.GSON.fromJson(s2, Map.class));
+                }
+            });
+        });
     }
 
     public ChildQueue fetchBestChildQueue(ParentQueue parentQueue, Player player) {
-        for (ChildQueue value : parentQueue.getChildren().descendingMap().values()) {
+        for (ChildQueue value : parentQueue.getSortedChildren()) {
             if (value.getPermission() != null && player.hasPermission(value.getPermission())) {
                 return value;
             }
         }
 
-        // this should never be null
+        // this should never be null, if it is, something is very very wrong
         return parentQueue.getChildren().get(0);
     }
 }

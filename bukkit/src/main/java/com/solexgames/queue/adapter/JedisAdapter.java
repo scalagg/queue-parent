@@ -46,6 +46,17 @@ public class JedisAdapter implements JedisHandler {
             "",
     };
 
+    @Subscription(action = "QUEUE_DATA_UPDATE")
+    public void onQueueDataUpdate(JsonAppender jsonAppender) {
+        final String parentQueueName = jsonAppender.getParam("PARENT");
+        final ParentQueue parentQueue = QueueBukkit.getInstance().getQueueHandler()
+                .getParentQueueMap().get(parentQueueName);
+
+        if (parentQueue != null) {
+            parentQueue.getSettings().put(jsonAppender.getParam("KEY"), Boolean.parseBoolean(jsonAppender.getParam("VALUE")));
+        }
+    }
+
     @Subscription(action = "QUEUE_ADD_PLAYER")
     public void onQueueAddPlayer(JsonAppender jsonAppender) {
         final String parentQueueName = jsonAppender.getParam("PARENT");
@@ -168,7 +179,7 @@ public class JedisAdapter implements JedisHandler {
                     .replace("<name>", childQueue.getParent().getFancyName())
                     .replace("<position>", String.valueOf(childQueue.getPosition(queuePlayer)))
                     .replace("<max>", String.valueOf(childQueue.getAllQueued()))
-                    .replace("<child_name>", childQueue.getName())
+                    .replace("<child_name>", childQueue.getFancyName())
                     .replace("<server_status>", status)
             );
         }
@@ -180,7 +191,7 @@ public class JedisAdapter implements JedisHandler {
                     .replace("<name>", childQueue.getParent().getFancyName())
                     .replace("<position>", String.valueOf(childQueue.getPosition(queuePlayer)))
                     .replace("<max>", String.valueOf(childQueue.getAllQueued()))
-                    .replace("<child_name>", childQueue.getName())
+                    .replace("<child_name>", childQueue.getFancyName())
             );
         }
     }

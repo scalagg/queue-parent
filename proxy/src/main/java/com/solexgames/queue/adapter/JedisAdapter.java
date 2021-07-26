@@ -1,6 +1,7 @@
 package com.solexgames.queue.adapter;
 
 import com.solexgames.queue.QueueProxy;
+import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
@@ -19,6 +20,21 @@ import java.util.UUID;
 
 public class JedisAdapter implements JedisHandler {
 
+    @Subscription(action = "QUEUE_DATA_UPDATE")
+    public void onQueueDataUpdate(JsonAppender jsonAppender) {
+        final String parentQueueName = jsonAppender.getParam("PARENT");
+        final ParentQueue parentQueue = QueueProxy.getInstance().getQueueHandler()
+                .getParentQueueMap().get(parentQueueName);
+
+        if (parentQueue != null) {
+            parentQueue.getSettings().put(jsonAppender.getParam("KEY"), Boolean.parseBoolean(jsonAppender.getParam("VALUE")));
+
+            QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
+                jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName(), CorePlugin.GSON.toJson(parentQueue.getSettings()));
+            });
+        }
+    }
+
     @Subscription(action = "QUEUE_ADD_PLAYER")
     public void onQueueAddPlayer(JsonAppender jsonAppender) {
         final String parentQueueName = jsonAppender.getParam("PARENT");
@@ -35,6 +51,10 @@ public class JedisAdapter implements JedisHandler {
 
                 childQueueOptional.ifPresent(childQueue -> {
                     childQueue.getQueued().add(queuePlayer);
+
+                    QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
+                        jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), CorePlugin.GSON.toJson(childQueue.getQueued()));
+                    });
                 });
             }
         }
@@ -57,6 +77,10 @@ public class JedisAdapter implements JedisHandler {
 
                 queuePlayer.ifPresent(queuePlayer1 -> {
                     childQueue.getQueued().remove(queuePlayer1);
+
+                    QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
+                        jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), CorePlugin.GSON.toJson(childQueue.getQueued()));
+                    });
                 });
             });
         }

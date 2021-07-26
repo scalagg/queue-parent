@@ -1,7 +1,6 @@
 package com.solexgames.queue.task;
 
 import com.solexgames.queue.QueueProxy;
-import com.solexgames.queue.commons.logger.QueueLogger;
 import com.solexgames.xenon.redis.JedisManager;
 import com.solexgames.xenon.redis.json.JsonAppender;
 import lombok.RequiredArgsConstructor;

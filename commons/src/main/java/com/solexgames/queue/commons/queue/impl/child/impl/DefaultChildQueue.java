@@ -11,6 +11,6 @@ import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 public class DefaultChildQueue extends ChildQueue {
 
     public DefaultChildQueue(ParentQueue parent) {
-        super(parent, "Normal", null);
+        super(parent, "normal", "Normal", null);
     }
 }

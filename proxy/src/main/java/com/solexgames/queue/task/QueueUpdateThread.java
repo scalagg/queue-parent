@@ -30,11 +30,8 @@ public class QueueUpdateThread extends Thread {
     @Override
     @SneakyThrows
     public void run() {
-        while (this.parentQueue.isRunning()) {
-            final TreeMap<Integer, ChildQueue> sortedTree = new TreeMap<>(this.parentQueue.getChildren().descendingMap());
-            final List<ChildQueue> sortedList = sortedTree.entrySet().stream().sorted(Comparator.comparingInt(Entry::getKey))
-                    .map(Entry::getValue).collect(Collectors.toList());
-            final ServerInfo serverInfo = ProxyServer.getInstance().getServerInfo(this.parentQueue.getTargetServer());
+        while (!this.parentQueue.getSetting("running")) {
+            final List<ChildQueue> sortedList = this.parentQueue.getSortedChildren();
 
             for (final ChildQueue childQueue : sortedList) {
                 if (!childQueue.getQueued().isEmpty()) {

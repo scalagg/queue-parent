@@ -34,9 +34,9 @@ public class JoinQueueCommand extends BaseCommand {
             throw new InvalidCommandArgument("Something went wrong.");
         }
 
-        final String alreadyIn = queuePlayer.getQueueMap().get(parentQueue.getName());
+        final boolean alreadyIn = queuePlayer.getQueueMap().contains(parentQueue.getName());
 
-        if (alreadyIn != null) {
+        if (alreadyIn) {
             throw new InvalidCommandArgument("You're already in the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " queue.");
         }
 
@@ -58,7 +58,7 @@ public class JoinQueueCommand extends BaseCommand {
                         .getAsJson());
             });
 
-            queuePlayer.getQueueMap().put(parentQueue.getName(), parentQueue.getName());
+            queuePlayer.getQueueMap().add(parentQueue.getName());
 
             return bestChildQueue;
         }).whenComplete((childQueue, throwable) -> {

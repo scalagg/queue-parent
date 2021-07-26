@@ -6,6 +6,7 @@ import com.solexgames.queue.commons.queue.Queue;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.Optional;
 import java.util.PriorityQueue;
@@ -16,16 +17,17 @@ import java.util.UUID;
  * @since 7/24/2021
  */
 
-@Getter
+@Getter @Setter
 @RequiredArgsConstructor
 public class ChildQueue extends Queue {
 
     private final ParentQueue parent;
 
     private final String name;
+    private final String fancyName;
     private final String permission;
 
-    private final PriorityQueue<CachedQueuePlayer> queued = new PriorityQueue<>();
+    private PriorityQueue<CachedQueuePlayer> queued = new PriorityQueue<>();
 
     public int getAllQueued() {
         return this.queued.size();
