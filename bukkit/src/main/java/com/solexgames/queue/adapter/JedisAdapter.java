@@ -148,9 +148,7 @@ public class JedisAdapter implements JedisHandler {
 
     @Subscription(action = "QUEUE_BROADCAST_ALL")
     public void onQueueBroadcast(JsonAppender jsonAppender) {
-        final List<ParentQueue> parents = new ArrayList<>(QueueBukkit.getInstance().getQueueHandler().getParentQueueMap().values());
-
-        parents.forEach(parentQueue -> {
+        QueueBukkit.getInstance().getQueueHandler().getParentQueueMap().values().forEach(parentQueue -> {
             parentQueue.getChildren().forEach((integer, childQueue) -> {
                 childQueue.getQueued().forEach(queuePlayer -> {
                     final Player bukkitPlayer = Bukkit.getPlayer(queuePlayer.getUniqueId());

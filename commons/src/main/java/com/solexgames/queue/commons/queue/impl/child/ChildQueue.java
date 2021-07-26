@@ -27,20 +27,27 @@ public class ChildQueue extends Queue {
     private final String fancyName;
     private final String permission;
 
-    private PriorityQueue<CachedQueuePlayer> queued = new PriorityQueue<>();
+    private PriorityQueue<CachedQueuePlayer> queued;
+
+    {
+        this.queued = new PriorityQueue<>();
+    }
 
     public int getAllQueued() {
         return this.queued.size();
     }
 
     public Optional<CachedQueuePlayer> findQueuePlayerInChildQueue(UUID uuid) {
-        return this.queued.stream().filter(queuePlayer -> queuePlayer.getUniqueId().toString().equals(uuid.toString()))
+        return this.queued.stream()
+                .filter(queuePlayer -> queuePlayer.getUniqueId().toString().equals(uuid.toString()))
                 .findFirst();
     }
 
     @Override
     public boolean isQueued(CachedQueuePlayer queuePlayer) {
-        return this.queued.contains(queuePlayer);
+        return this.queued.stream()
+                .filter(queuePlayer1 -> queuePlayer.getUniqueId().toString().equals(queuePlayer1.getUniqueId().toString()))
+                .findFirst().orElse(null) != null;
     }
 
     @Override

@@ -53,6 +53,12 @@ public class ParentQueue extends Queue {
                 .findFirst();
     }
 
+    public Optional<ChildQueue> getChildQueue(UUID uuid) {
+        return this.children.values().stream()
+                .filter(childQueue -> childQueue.findQueuePlayerInChildQueue(uuid).isPresent())
+                .findFirst();
+    }
+
     public Optional<ChildQueue> getChildQueue(CachedQueuePlayer queuePlayer) {
         return this.children.values().stream()
                 .filter(childQueue -> childQueue.isQueued(queuePlayer))

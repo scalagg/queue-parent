@@ -30,7 +30,7 @@ public class QueueUpdateThread extends Thread {
     @Override
     @SneakyThrows
     public void run() {
-        while (!this.parentQueue.getSetting("running")) {
+        while (this.parentQueue.getSetting("running")) {
             final List<ChildQueue> sortedList = this.parentQueue.getSortedChildren();
 
             for (final ChildQueue childQueue : sortedList) {

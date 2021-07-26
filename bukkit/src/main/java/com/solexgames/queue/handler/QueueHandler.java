@@ -3,6 +3,8 @@ package com.solexgames.queue.handler;
 import com.solexgames.core.CorePlugin;
 import com.solexgames.queue.QueueBukkit;
 import com.solexgames.queue.commons.constants.QueueGlobalConstants;
+import com.solexgames.queue.commons.logger.QueueLogger;
+import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import lombok.Getter;
@@ -53,30 +55,39 @@ public class QueueHandler {
         QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
             final Map<String, String> jedisValues = jedis.hgetAll(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE);
 
-            jedisValues.forEach((s, s2) -> {
-                final String[] dataSplit = s.split(":");
-                final ParentQueue parentQueue = this.parentQueueMap.get(dataSplit[0]);
+            if (jedisValues != null) {
+                jedisValues.forEach((s, s2) -> {
+                    final String[] dataSplit = s.split(":");
 
-                if (parentQueue != null) {
-                    final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(dataSplit[1]);
+                    if (dataSplit.length == 2) {
+                        final ParentQueue parentQueue = this.parentQueueMap.get(dataSplit[0]);
 
-                    childQueueOptional.ifPresent(childQueue -> {
-                        childQueue.setQueued(CorePlugin.GSON.fromJson(s2, PriorityQueue.class));
-                    });
-                }
-            });
+                        if (parentQueue != null) {
+                            final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(dataSplit[1]);
+
+                            childQueueOptional.ifPresent(childQueue -> {
+                                childQueue.setQueued(CorePlugin.GSON.fromJson(s2, PriorityQueue.class));
+                            });
+                        }
+                    } else {
+                        QueueLogger.log("Something went wrong while trying to update a parent queue from jedis! " + s + " - " + s2);
+                    }
+                });
+            }
         });
 
         QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
             final Map<String, String> jedisValues = jedis.hgetAll(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE);
 
-            jedisValues.forEach((s, s2) -> {
-                final ParentQueue parentQueue = this.parentQueueMap.get(s);
+            if (jedisValues != null) {
+                jedisValues.forEach((s, s2) -> {
+                    final ParentQueue parentQueue = this.parentQueueMap.get(s);
 
-                if (parentQueue != null) {
-                    parentQueue.setSettings(CorePlugin.GSON.fromJson(s2, Map.class));
-                }
-            });
+                    if (parentQueue != null) {
+                        parentQueue.setSettings(CorePlugin.GSON.fromJson(s2, Map.class));
+                    }
+                });
+            }
         });
     }
 

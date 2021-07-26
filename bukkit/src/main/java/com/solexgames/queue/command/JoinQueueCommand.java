@@ -50,15 +50,13 @@ public class JoinQueueCommand extends BaseCommand {
             final ChildQueue bestChildQueue = QueueBukkit.getInstance().getQueueHandler()
                     .fetchBestChildQueue(parentQueue, player);
 
-            QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
-                jedis.publish("queue_global", new JsonAppender("QUEUE_ADD_PLAYER")
-                        .put("PARENT", parentQueue.getName())
-                        .put("CHILD", bestChildQueue.getName())
-                        .put("PLAYER", CorePlugin.GSON.toJson(queuePlayer))
-                        .getAsJson());
-            });
-
-            queuePlayer.getQueueMap().add(parentQueue.getName());
+            QueueBukkit.getInstance().getJedisManager().publish(
+                    new JsonAppender("QUEUE_ADD_PLAYER")
+                            .put("PARENT", parentQueue.getName())
+                            .put("CHILD", bestChildQueue.getName())
+                            .put("PLAYER", CorePlugin.GSON.toJson(queuePlayer))
+                            .getAsJson()
+            );
 
             return bestChildQueue;
         }).whenComplete((childQueue, throwable) -> {
@@ -67,6 +65,8 @@ public class JoinQueueCommand extends BaseCommand {
 
                 player.sendMessage(ChatColor.RED + "We couldn't add you to the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " queue.");
             } else {
+                queuePlayer.getQueueMap().add(parentQueue.getName());
+
                 player.sendMessage(ChatColor.GREEN + "You've been added to the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.GREEN + " queue.");
             }
         });

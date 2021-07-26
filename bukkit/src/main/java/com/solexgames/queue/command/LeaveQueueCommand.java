@@ -51,12 +51,12 @@ public class LeaveQueueCommand extends BaseCommand {
         }
 
         final ParentQueue fetchedQueue = QueueBukkit.getInstance().getQueueHandler()
-                .getParentQueueMap().get(queuePlayer.getQueueMap().size() == 0 ? null : queuePlayer.getQueueMap().get(0));
+                .getParentQueueMap().getOrDefault(queuePlayer.getQueueMap().size() == 0 ? null : queuePlayer.getQueueMap().get(0), null);
 
         if (fetchedQueue != null) {
             this.leaveQueue(fetchedQueue, player, queuePlayer, false);
         } else {
-            player.sendMessage(ChatColor.RED + "You're not currently queued for a server.");
+            player.sendMessage(ChatColor.RED + "You're not currently queued for a server. 1");
         }
     }
 
@@ -69,13 +69,15 @@ public class LeaveQueueCommand extends BaseCommand {
                         new JsonAppender("QUEUE_REMOVE_PLAYER")
                                 .put("PARENT", parentQueue.getName())
                                 .put("CHILD", childQueue.getName())
-                                .put("CHILD", queuePlayer.getUniqueId().toString())
+                                .put("PLAYER", queuePlayer.getUniqueId().toString())
                                 .getAsJson()
                 );
             }).whenComplete((unused, throwable) -> {
                 if (throwable != null) {
                     throwable.printStackTrace();
                 }
+
+                queuePlayer.getQueueMap().remove(parentQueue.getName());
 
                 player.sendMessage(ChatColor.RED + "You've left the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " queue.");
             });

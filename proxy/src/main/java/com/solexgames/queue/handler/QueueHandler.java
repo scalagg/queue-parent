@@ -40,8 +40,6 @@ public class QueueHandler {
             });
 
             this.parentQueueMap.put(key, parentQueue);
-
-            System.out.println("Loaded parent queue " + key + " with " + children.size() + " child queues.");
         });
     }
 }
