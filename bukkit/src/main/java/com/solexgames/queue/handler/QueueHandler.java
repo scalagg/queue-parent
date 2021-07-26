@@ -4,7 +4,6 @@ import com.solexgames.core.CorePlugin;
 import com.solexgames.queue.QueueBukkit;
 import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.logger.QueueLogger;
-import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import lombok.Getter;

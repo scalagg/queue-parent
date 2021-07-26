@@ -10,42 +10,16 @@ import com.solexgames.xenon.CorePlugin;
 import com.solexgames.xenon.redis.annotation.Subscription;
 import com.solexgames.xenon.redis.handler.JedisHandler;
 import com.solexgames.xenon.redis.json.JsonAppender;
-import com.solexgames.xenon.redis.packet.JedisAction;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.event.EventHandler;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author GrowlyX
  * @since 7/25/2021
  */
 
-public class JedisAdapter implements JedisHandler, Listener {
-
-    @EventHandler
-    public void onDisconnect(PlayerDisconnectEvent event) {
-        ProxyServer.getInstance().getScheduler().schedule(CorePlugin.getInstance(), () -> CompletableFuture.runAsync(() -> {
-            if (ProxyServer.getInstance().getPlayer(event.getPlayer().getName()) == null) {
-                QueueProxy.getInstance().getQueueHandler().getParentQueueMap().forEach((s, parentQueue) -> {
-                    parentQueue.getChildQueue(event.getPlayer().getUniqueId()).ifPresent(childQueue ->
-                            CorePlugin.getInstance().getJedisManager().publish(
-                                    new JsonAppender("QUEUE_REMOVE_PLAYER")
-                                            .put("PARENT", parentQueue.getName())
-                                            .put("CHILD", childQueue.getName())
-                                            .put("PLAYER", event.getPlayer().getUniqueId().toString())
-                                            .getAsJson()
-                            )
-                    );
-                });
-            }
-        }), 1L, TimeUnit.SECONDS);
-    }
+public class JedisAdapter implements JedisHandler {
 
     @Subscription(action = "QUEUE_DATA_UPDATE")
     public void onQueueDataUpdate(JsonAppender jsonAppender) {

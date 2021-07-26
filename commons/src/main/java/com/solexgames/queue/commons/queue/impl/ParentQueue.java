@@ -38,7 +38,7 @@ public class ParentQueue extends Queue {
     }
 
     public boolean getSetting(String key) {
-        return this.settings.getOrDefault(key, false);
+        return this.settings.getOrDefault(key, true);
     }
 
     public List<ChildQueue> getSortedChildren() {

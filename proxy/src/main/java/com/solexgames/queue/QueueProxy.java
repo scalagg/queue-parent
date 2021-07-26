@@ -1,6 +1,7 @@
 package com.solexgames.queue;
 
 import com.solexgames.queue.adapter.JedisAdapter;
+import com.solexgames.queue.adapter.XenonJedisAdapter;
 import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.logger.QueueLogger;
 import com.solexgames.queue.commons.platform.QueuePlatform;
@@ -27,7 +28,9 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
     private static QueueProxy instance;
 
     private QueueHandler queueHandler;
+
     private JedisManager jedisManager;
+    private JedisManager xenonJedisManager;
 
     private boolean shouldBroadcast = true;
 
@@ -45,6 +48,12 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
         this.jedisManager = new JedisBuilder()
                 .withChannel("queue_global")
                 .withHandler(new JedisAdapter())
+                .withSettings(CorePlugin.getInstance().getJedisManager().getSettings())
+                .build();
+
+        this.xenonJedisManager = new JedisBuilder()
+                .withChannel("scandium:bungee")
+                .withHandler(new XenonJedisAdapter())
                 .withSettings(CorePlugin.getInstance().getJedisManager().getSettings())
                 .build();
 

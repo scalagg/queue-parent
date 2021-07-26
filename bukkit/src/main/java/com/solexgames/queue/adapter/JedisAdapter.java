@@ -6,9 +6,7 @@ import com.solexgames.core.server.NetworkServer;
 import com.solexgames.lib.commons.redis.annotation.Subscription;
 import com.solexgames.lib.commons.redis.handler.JedisHandler;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
-import com.solexgames.lib.commons.util.BungeeUtil;
 import com.solexgames.queue.QueueBukkit;
-import com.solexgames.queue.commons.logger.QueueLogger;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
@@ -16,8 +14,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
