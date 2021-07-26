@@ -15,11 +15,15 @@ import java.util.*;
 
 @Getter
 @RequiredArgsConstructor
-public class CachedQueuePlayer extends QueuePlayer {
+public class CachedQueuePlayer extends QueuePlayer implements Comparable<CachedQueuePlayer> {
 
     private final String name;
     private final UUID uniqueId;
 
     private final List<String> queueMap = new ArrayList<>();
 
+    @Override
+    public int compareTo(CachedQueuePlayer cachedQueuePlayer) {
+        return cachedQueuePlayer.getUniqueId().compareTo(this.getUniqueId());
+    }
 }

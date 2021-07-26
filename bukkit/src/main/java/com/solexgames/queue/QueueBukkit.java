@@ -2,7 +2,7 @@ package com.solexgames.queue;
 
 import com.solexgames.core.CorePlugin;
 import com.solexgames.lib.acf.InvalidCommandArgument;
-import com.solexgames.lib.commons.processor.AcfCommandProcessor;
+import com.solexgames.lib.acf.PaperCommandManager;
 import com.solexgames.lib.commons.redis.JedisBuilder;
 import com.solexgames.lib.commons.redis.JedisManager;
 import com.solexgames.lib.processor.config.ConfigFactory;
@@ -56,16 +56,18 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
         this.settings = this.factory.fromFile("settings", QueueBukkitSettings.class);
 
         this.saveDefaultConfig();
+
         this.setupJedisManager();
         this.setupQueueHandler();
         this.setupCommandManager();
-        this.setupTasks();
+
+        this.setupEventSubscriptions();
     }
 
     private void setupCommandManager() {
-        final AcfCommandProcessor processor = new AcfCommandProcessor(this);
+        final PaperCommandManager commandManager = new PaperCommandManager(this);
 
-        processor.getCommandContexts().registerContext(ParentQueue.class, c -> {
+        commandManager.getCommandContexts().registerContext(ParentQueue.class, c -> {
             final String firstArgument = c.getFirstArg();
             final ParentQueue parentQueue = this.getQueueHandler().getParentQueueMap().get(firstArgument);
 
@@ -76,9 +78,9 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
             return parentQueue;
         });
 
-        processor.registerCommand(new JoinQueueCommand());
-        processor.registerCommand(new LeaveQueueCommand());
-        processor.registerCommand(new QueueMetaCommand());
+        commandManager.registerCommand(new JoinQueueCommand());
+        commandManager.registerCommand(new LeaveQueueCommand());
+        commandManager.registerCommand(new QueueMetaCommand());
     }
 
     private void setupQueueHandler() {
@@ -86,7 +88,7 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
         this.queueHandler.loadQueuesFromConfiguration();
     }
 
-    private void setupTasks() {
+    private void setupEventSubscriptions() {
         Events.subscribe(AsyncPlayerPreLoginEvent.class).handler(event -> {
             final CompletableFuture<CachedQueuePlayer> completableFuture = this.playerHandler
                     .fetchCachedDataFromRedis(event.getName(), event.getUniqueId());
