@@ -1,3 +1,4 @@
+server-id: "something-something"
 queues:
   na-practice:
     fancyName: "NA Practice"
@@ -7,3 +8,9 @@ queues:
         fancyName: "Fast Pass"
         permission: "queue.lanes.fastpass"
         priority: 1
+redis:
+  host: "127.0.0.1"
+  port: 6379
+  authentication:
+    enabled: false
+    password: ""

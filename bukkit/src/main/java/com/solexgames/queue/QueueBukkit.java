@@ -1,6 +1,5 @@
 package com.solexgames.queue;
 
-import com.solexgames.core.CorePlugin;
 import com.solexgames.lib.acf.InvalidCommandArgument;
 import com.solexgames.lib.acf.PaperCommandManager;
 import com.solexgames.lib.commons.redis.JedisBuilder;
@@ -17,14 +16,18 @@ import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.handler.PlayerHandler;
 import com.solexgames.queue.handler.QueueHandler;
 import com.solexgames.queue.internal.QueueBukkitSettings;
+import com.solexgames.queue.provider.SettingsProvider;
+import com.solexgames.queue.provider.impl.DefaultSettingsProvider;
+import com.solexgames.queue.provider.impl.ScandiumSettingsProvider;
 import com.solexgames.queue.runnable.QueueServerUpdateRunnable;
+import lombok.Getter;
 import me.lucko.helper.Events;
 import me.lucko.helper.Schedulers;
 import me.lucko.helper.plugin.ExtendedJavaPlugin;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import lombok.Getter;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -47,7 +50,7 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
     private JedisManager jedisManager;
     private JedisManager bungeeJedisManager;
 
-    private String serverName;
+    private SettingsProvider settingsProvider;
 
     private final ConfigFactory factory = ConfigFactory.newFactory(this);
 
@@ -58,16 +61,24 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
         QueuePlatforms.setPlatform(this);
 
         this.settings = this.factory.fromFile("settings", QueueBukkitSettings.class);
-        this.serverName = CorePlugin.getInstance().getServerName();
 
         this.saveDefaultConfig();
 
+        this.setupSettingsProvider();
         this.setupJedisManager();
         this.setupQueueHandler();
         this.setupCommandManager();
 
         this.setupEventSubscriptions();
         this.setupTaskSubscriptions();
+    }
+
+    private void setupSettingsProvider() {
+        if (Bukkit.getPluginManager().isPluginEnabled("Scandium")) {
+            this.settingsProvider = new ScandiumSettingsProvider();
+        } else {
+            this.settingsProvider = new DefaultSettingsProvider(this.getConfig());
+        }
     }
 
     private void setupTaskSubscriptions() {
@@ -136,11 +147,11 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
         this.jedisManager = new JedisBuilder()
                 .withChannel("queue_global")
                 .withHandler(new JedisAdapter())
-                .withSettings(CorePlugin.getInstance().getDefaultJedisSettings())
+                .withSettings(this.settingsProvider.getJedisSettings())
                 .build();
         this.bungeeJedisManager = new JedisBuilder()
                 .withChannel("scandium:bungee")
-                .withSettings(CorePlugin.getInstance().getDefaultJedisSettings())
+                .withSettings(this.settingsProvider.getJedisSettings())
                 .build();
 
         this.playerHandler = new PlayerHandler(this.jedisManager);

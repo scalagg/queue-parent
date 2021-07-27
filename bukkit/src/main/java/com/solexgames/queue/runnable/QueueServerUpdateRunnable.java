@@ -28,7 +28,7 @@ public class QueueServerUpdateRunnable implements Runnable {
 
             jedis.hset(
                     QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE,
-                    QueueBukkit.getInstance().getServerName(),
+                    QueueBukkit.getInstance().getSettingsProvider().getServerName(),
                     QueueGlobalConstants.GSON.toJson(this.serverData)
             );
         });
