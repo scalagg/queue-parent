@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author GrowlyX
@@ -31,5 +32,7 @@ public class QueueGlobalConstants {
     public static final Gson GSON = new GsonBuilder()
             .serializeNulls()
             .create();
+
+    public static final long FIFTEEN_SECONDS = TimeUnit.SECONDS.toMillis(15L);
 
 }

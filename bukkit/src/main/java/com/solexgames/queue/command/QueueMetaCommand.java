@@ -1,14 +1,20 @@
 package com.solexgames.queue.command;
 
+import com.solexgames.core.CorePlugin;
 import com.solexgames.lib.acf.BaseCommand;
 import com.solexgames.lib.acf.CommandHelp;
 import com.solexgames.lib.acf.InvalidCommandArgument;
 import com.solexgames.lib.acf.annotation.*;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
 import com.solexgames.queue.QueueBukkit;
+import com.solexgames.queue.commons.model.server.ServerData;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author GrowlyX
@@ -61,9 +67,48 @@ public class QueueMetaCommand extends BaseCommand {
         });
     }
 
-    @Subcommand("list-all-queues")
-    @Description("Fetch and return all available queues and their information.")
+    @Subcommand("servers")
+    @Description("Fetch and return all available servers and their information.")
     public void onQueueList(Player player) {
+        player.sendMessage(ChatColor.GREEN + "Fetching server data from redis...");
 
+        final CompletableFuture<Map<String, ServerData>> completableFuture = QueueBukkit
+                .getInstance().getQueueHandler().fetchAllServerData();
+
+        completableFuture.whenComplete((stringServerDataMap, throwable) -> {
+            if (throwable != null) {
+                throwable.printStackTrace();
+            }
+
+            stringServerDataMap.forEach((s, serverData) -> {
+                final boolean isQueue = QueueBukkit.getInstance().getQueueHandler().getParentQueueMap().get(s) != null;
+
+                player.sendMessage(ChatColor.GRAY + " - " + ChatColor.YELLOW + s + ChatColor.GRAY + " (WL: " + (serverData.isWhitelisted() ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No") + ChatColor.GRAY + ") (Queue: " + (isQueue ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No") + ChatColor.GRAY + ")");
+            });
+        });
+    }
+
+    @Syntax("<server id>")
+    @Subcommand("info|information")
+    @Description("Fetches information for a specific server and returns it in a fancy format.")
+    public void onServerId(Player player, String serverName) {
+        player.sendMessage(ChatColor.GREEN + "Fetching server data from redis...");
+
+        final CompletableFuture<ServerData> completableFuture = QueueBukkit.getInstance()
+                .getQueueHandler().fetchServerData(serverName);
+
+        completableFuture.whenComplete((serverData, throwable) -> {
+            if (throwable != null) {
+                throwable.printStackTrace();
+            }
+
+            if (serverData == null) {
+                throw new InvalidCommandArgument("That server's not online.");
+            }
+
+            player.sendMessage(" ");
+            player.sendMessage(" ");
+            player.sendMessage(" ");
+        });
     }
 }

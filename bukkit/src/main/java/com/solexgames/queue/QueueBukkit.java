@@ -88,6 +88,8 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
     private void setupCommandManager() {
         final PaperCommandManager commandManager = new PaperCommandManager(this);
 
+        commandManager.enableUnstableAPI("help");
+
         commandManager.getCommandContexts().registerContext(ParentQueue.class, c -> {
             final String firstArgument = c.getFirstArg();
             final ParentQueue parentQueue = this.getQueueHandler().getParentQueueMap().get(firstArgument);

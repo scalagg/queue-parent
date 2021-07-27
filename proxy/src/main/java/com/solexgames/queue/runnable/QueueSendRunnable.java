@@ -1,6 +1,7 @@
 package com.solexgames.queue.runnable;
 
 import com.solexgames.queue.QueueProxy;
+import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.model.server.ServerData;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import com.solexgames.queue.handler.QueueHandler;
@@ -32,11 +33,15 @@ public class QueueSendRunnable implements Runnable {
                     throwable.printStackTrace();
                 }
 
+                if (serverData == null) {
+                    return;
+                }
+
                 if (!parentQueue.getSetting("running")) {
                     return;
                 }
 
-                if (serverData.isWhitelisted()) {
+                if (serverData.getLastUpdate() + QueueGlobalConstants.FIFTEEN_SECONDS <= System.currentTimeMillis()) {
                     return;
                 }
 
@@ -48,12 +53,12 @@ public class QueueSendRunnable implements Runnable {
 
                 for (final ChildQueue childQueue : sortedList) {
                     if (!childQueue.getQueued().isEmpty()) {
-                        final UUID queuePlayer = childQueue.getQueued().poll();
+                        final UUID uuid = childQueue.getQueued().poll();
 
-                        if (queuePlayer != null) {
+                        if (uuid != null) {
                             QueueProxy.getInstance().getJedisManager().publish(
                                     new JsonAppender("QUEUE_SEND_PLAYER")
-                                            .put("PLAYER_ID", queuePlayer.toString())
+                                            .put("PLAYER_ID", uuid.toString())
                                             .put("PARENT", parentQueue.getName())
                                             .put("CHILD", childQueue.getName())
                                             .getAsJson()

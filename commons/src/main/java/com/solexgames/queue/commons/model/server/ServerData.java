@@ -2,6 +2,8 @@ package com.solexgames.queue.commons.model.server;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @author GrowlyX
  * @since 7/26/2021
@@ -16,5 +18,9 @@ public class ServerData {
     private int maxPlayers;
 
     private boolean whitelisted;
+
+    private List<String> whitelistedPlayers;
+
+    private long lastUpdate;
 
 }

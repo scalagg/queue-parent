@@ -116,6 +116,31 @@ public class QueueHandler {
     }
 
     /**
+     * Retrieves server data for all servers
+     * from jedis and returns it in an object form.
+     *
+     * @return a completable future of a map of {@link ServerData} objects and their id
+     */
+    public CompletableFuture<Map<String, ServerData>> fetchAllServerData() {
+        return CompletableFuture.supplyAsync(() -> {
+            final AtomicReference<Map<String, ServerData>> serverDataAtomicReference = new AtomicReference<>();
+
+            QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
+                final Map<String, String> jedisValue = jedis.hgetAll(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE);
+                final Map<String, ServerData> deserialized = new HashMap<>();
+
+                jedisValue.forEach((s, s2) -> {
+                    deserialized.put(s, QueueGlobalConstants.GSON.fromJson(s2, ServerData.class));
+                });
+
+                serverDataAtomicReference.set(deserialized);
+            });
+
+            return serverDataAtomicReference.get();
+        });
+    }
+
+    /**
      * Finds all queues that a player's queued
      * in and returns it in a list.
      *
