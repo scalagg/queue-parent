@@ -83,7 +83,7 @@ public class ParentQueue extends Queue {
 
     @Override
     @Deprecated
-    public PriorityQueue<CachedQueuePlayer> getQueued() {
+    public PriorityQueue<UUID> getQueued() {
         throw new RuntimeException("ParentQueue#getQueued is not supported, please use a child queue.");
     }
 }

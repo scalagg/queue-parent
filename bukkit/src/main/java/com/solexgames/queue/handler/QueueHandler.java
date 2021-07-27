@@ -65,7 +65,7 @@ public class QueueHandler {
                             final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(dataSplit[1]);
 
                             childQueueOptional.ifPresent(childQueue -> {
-                                childQueue.setQueued(CorePlugin.GSON.fromJson(s2, QueueGlobalConstants.CACHED_QUEUE_PLAYER_TYPE));
+                                childQueue.setQueued(CorePlugin.GSON.fromJson(s2, QueueGlobalConstants.PRIORITY_QUEUE_PLAYER_TYPE));
                             });
                         }
                     } else {

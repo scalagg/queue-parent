@@ -5,6 +5,7 @@ import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 
 import java.util.PriorityQueue;
+import java.util.UUID;
 
 /**
  * @author GrowlyX
@@ -20,6 +21,6 @@ public abstract class Queue {
 
     public abstract String getTargetServer();
 
-    public abstract PriorityQueue<CachedQueuePlayer> getQueued();
+    public abstract PriorityQueue<UUID> getQueued();
 
 }

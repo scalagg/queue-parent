@@ -22,6 +22,7 @@ import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.File;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -82,12 +83,12 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
 
                     for (final ChildQueue childQueue : sortedList) {
                         if (!childQueue.getQueued().isEmpty()) {
-                            final CachedQueuePlayer queuePlayer = childQueue.getQueued().poll();
+                            final UUID queuePlayer = childQueue.getQueued().poll();
 
                             if (queuePlayer != null) {
                                 QueueProxy.getInstance().getJedisManager().publish(
                                         new JsonAppender("QUEUE_SEND_PLAYER")
-                                                .put("PLAYER_ID", queuePlayer.getUniqueId().toString())
+                                                .put("PLAYER_ID", queuePlayer.toString())
                                                 .put("PARENT", parentQueue.getName())
                                                 .put("CHILD", childQueue.getName())
                                                 .getAsJson()

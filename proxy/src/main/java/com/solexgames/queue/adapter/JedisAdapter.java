@@ -53,7 +53,7 @@ public class JedisAdapter implements JedisHandler {
                 final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(childQueueName);
 
                 childQueueOptional.ifPresent(childQueue -> {
-                    childQueue.getQueued().add(queuePlayer);
+                    childQueue.getQueued().add(queuePlayer.getUniqueId());
 
                     QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
                         jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), CorePlugin.GSON.toJson(childQueue.getQueued()));
@@ -76,7 +76,7 @@ public class JedisAdapter implements JedisHandler {
             final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(childQueueName);
 
             childQueueOptional.ifPresent(childQueue -> {
-                final Optional<CachedQueuePlayer> queuePlayer = childQueue.findQueuePlayerInChildQueue(uuid);
+                final Optional<UUID> queuePlayer = childQueue.findQueuePlayerInChildQueue(uuid);
 
                 queuePlayer.ifPresent(queuePlayer1 -> {
                     childQueue.getQueued().remove(queuePlayer1);

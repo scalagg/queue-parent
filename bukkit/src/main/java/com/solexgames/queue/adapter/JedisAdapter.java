@@ -68,7 +68,7 @@ public class JedisAdapter implements JedisHandler {
                 final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(childQueueName);
 
                 childQueueOptional.ifPresent(childQueue -> {
-                    childQueue.getQueued().add(queuePlayer);
+                    childQueue.getQueued().add(queuePlayer.getUniqueId());
                 });
             }
         }
@@ -87,7 +87,7 @@ public class JedisAdapter implements JedisHandler {
             final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(childQueueName);
 
             childQueueOptional.ifPresent(childQueue -> {
-                final Optional<CachedQueuePlayer> queuePlayer = childQueue.findQueuePlayerInChildQueue(uuid);
+                final Optional<UUID> queuePlayer = childQueue.findQueuePlayerInChildQueue(uuid);
 
                 queuePlayer.ifPresent(queuePlayer1 -> {
                     childQueue.getQueued().remove(queuePlayer1);
@@ -147,22 +147,23 @@ public class JedisAdapter implements JedisHandler {
             parentQueue.getChildren().forEach((integer, childQueue) -> {
                 if (childQueue.getQueued() != null) {
                     childQueue.getQueued().forEach(queuePlayer -> {
-                        final Player bukkitPlayer = Bukkit.getPlayer(queuePlayer.getUniqueId());
+                        final Player bukkitPlayer = Bukkit.getPlayer(queuePlayer);
 
                         if (bukkitPlayer != null) {
                             final NetworkServer networkServer = NetworkServer.getByName(parentQueue.getTargetServer());
+                            final CachedQueuePlayer queuePlayer1 = QueueBukkit.getInstance().getPlayerHandler().getByUuid(queuePlayer);
 
                             if (networkServer == null) {
-                                this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, "offline");
+                                this.sendNonJoinable(bukkitPlayer, queuePlayer1, childQueue, "offline");
                                 return;
                             }
 
                             if (networkServer.isWhitelistEnabled()) {
-                                this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, "whitelisted");
+                                this.sendNonJoinable(bukkitPlayer, queuePlayer1, childQueue, "whitelisted");
                             } else if (networkServer.getServerStatus().equals(NetworkServerStatusType.ONLINE)) {
-                                this.sendJoinable(bukkitPlayer, queuePlayer, childQueue);
+                                this.sendJoinable(bukkitPlayer, queuePlayer1, childQueue);
                             } else {
-                                this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, networkServer.getServerStatus().serverStatusString.toLowerCase());
+                                this.sendNonJoinable(bukkitPlayer, queuePlayer1, childQueue, networkServer.getServerStatus().getServerStatusString().toLowerCase());
                             }
                         }
                     });

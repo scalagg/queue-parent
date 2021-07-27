@@ -1,6 +1,5 @@
 package com.solexgames.queue.commons.queue.impl.child;
 
-import com.solexgames.queue.commons.model.QueuePlayer;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.Queue;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
@@ -27,7 +26,7 @@ public class ChildQueue extends Queue {
     private final String fancyName;
     private final String permission;
 
-    private PriorityQueue<CachedQueuePlayer> queued;
+    private PriorityQueue<UUID> queued;
 
     {
         this.queued = new PriorityQueue<>();
@@ -37,16 +36,16 @@ public class ChildQueue extends Queue {
         return this.queued.size();
     }
 
-    public Optional<CachedQueuePlayer> findQueuePlayerInChildQueue(UUID uuid) {
+    public Optional<UUID> findQueuePlayerInChildQueue(UUID uuid) {
         return this.queued.stream()
-                .filter(queuePlayer -> queuePlayer.getUniqueId().toString().equals(uuid.toString()))
+                .filter(queuePlayer -> queuePlayer.toString().equals(uuid.toString()))
                 .findFirst();
     }
 
     @Override
     public boolean isQueued(CachedQueuePlayer queuePlayer) {
         return this.queued.stream()
-                .filter(queuePlayer1 -> queuePlayer.getUniqueId().toString().equals(queuePlayer1.getUniqueId().toString()))
+                .filter(queuePlayer1 -> queuePlayer.getUniqueId().toString().equals(queuePlayer1.toString()))
                 .findFirst().orElse(null) != null;
     }
 
@@ -57,12 +56,12 @@ public class ChildQueue extends Queue {
 
     @Override
     public int getPosition(CachedQueuePlayer queuePlayer) {
-        final PriorityQueue<CachedQueuePlayer> players = new PriorityQueue<>(this.queued);
+        final PriorityQueue<UUID> players = new PriorityQueue<>(this.queued);
 
         for (int i = 0; i <= this.queued.size(); i++) {
-            final QueuePlayer player = players.poll();
+            final UUID player = players.poll();
 
-            if (player != null && player.getUniqueId().equals(queuePlayer.getUniqueId())) {
+            if (player != null && player.toString().equals(queuePlayer.getUniqueId().toString())) {
                 return i + 1;
             }
         }
