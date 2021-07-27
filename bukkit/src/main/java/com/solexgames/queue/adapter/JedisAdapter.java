@@ -83,10 +83,32 @@ public class JedisAdapter implements JedisHandler {
             final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(childQueueName);
 
             childQueueOptional.ifPresent(childQueue -> {
-                final Optional<UUID> queuePlayer = childQueue.findQueuePlayerInChildQueue(uuid);
+                childQueue.getQueued().remove(uuid);
+            });
+        }
+    }
 
-                queuePlayer.ifPresent(queuePlayer1 -> {
-                    childQueue.getQueued().remove(queuePlayer1);
+    @Subscription(action = "QUEUE_FLUSH")
+    public void onQueueFlush(JsonAppender jsonAppender) {
+        final String parentQueueName = jsonAppender.getParam("PARENT");
+
+        final ParentQueue parentQueue = QueueBukkit.getInstance().getQueueHandler()
+                .getParentQueueMap().get(parentQueueName);
+
+        if (parentQueue != null) {
+            CompletableFuture.runAsync(() -> {
+                parentQueue.getChildren().forEach((integer, childQueue) -> {
+                    childQueue.getQueued().forEach(uuid -> {
+                        final Player player = Bukkit.getPlayer(uuid);
+
+                        if (player != null) {
+                            player.sendMessage(ChatColor.RED + "You've been kicked from the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " queue.");
+                        }
+                    });
+                });
+            }).whenComplete((unused, throwable) -> {
+                parentQueue.getChildren().forEach((integer, childQueue) -> {
+                    childQueue.getQueued().clear();
                 });
             });
         }
@@ -112,14 +134,6 @@ public class JedisAdapter implements JedisHandler {
                         player.sendMessage(ChatColor.GREEN + "You're now being sent to " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.GREEN + ".");
 
                         CompletableFuture.runAsync(() -> {
-                            QueueBukkit.getInstance().getJedisManager().publish(
-                                    new JsonAppender("QUEUE_REMOVE_PLAYER")
-                                            .put("PARENT", parentQueue.getName())
-                                            .put("CHILD", childQueue.getName())
-                                            .put("PLAYER", queuePlayer.getUniqueId().toString())
-                                            .getAsJson()
-                            );
-
                             QueueBukkit.getInstance().getBungeeJedisManager().publish(
                                     new JsonAppender("SEND_SERVER")
                                             .put("PLAYER", queuePlayer.getName())
@@ -144,9 +158,9 @@ public class JedisAdapter implements JedisHandler {
                     .fetchServerData(parentQueue.getTargetServer());
 
             completableFuture.whenComplete((serverData, throwable) -> {
-               if (throwable != null) {
-                   throwable.printStackTrace();
-               }
+                if (throwable != null) {
+                    throwable.printStackTrace();
+                }
 
                 parentQueue.getChildren().forEach((integer, childQueue) -> {
                     if (childQueue.getQueued() != null) {

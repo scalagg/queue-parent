@@ -24,50 +24,56 @@ public class QueueSendRunnable implements Runnable {
 
     @Override
     public void run() {
-        this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
-            final CompletableFuture<ServerData> serverDataCompletableFuture = QueueProxy.getInstance()
-                    .getQueueHandler().fetchServerData(parentQueue.getTargetServer());
+        CompletableFuture.runAsync(() -> {
+            this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
+                final CompletableFuture<ServerData> serverDataCompletableFuture = QueueProxy.getInstance()
+                        .getQueueHandler().fetchServerData(parentQueue.getTargetServer());
 
-            serverDataCompletableFuture.whenComplete((serverData, throwable) -> {
-                if (throwable != null) {
-                    throwable.printStackTrace();
-                }
+                serverDataCompletableFuture.whenComplete((serverData, throwable) -> {
+                    if (throwable != null) {
+                        throwable.printStackTrace();
+                    }
 
-                if (serverData == null) {
-                    return;
-                }
-
-                if (!parentQueue.getSetting("running")) {
-                    return;
-                }
-
-                if (serverData.getLastUpdate() + QueueGlobalConstants.FIFTEEN_SECONDS <= System.currentTimeMillis()) {
-                    return;
-                }
-
-                if (serverData.getOnlinePlayers() >= serverData.getMaxPlayers()) {
-                    return;
-                }
-
-                final List<ChildQueue> sortedList = parentQueue.getSortedChildren();
-
-                for (final ChildQueue childQueue : sortedList) {
-                    if (!childQueue.getQueued().isEmpty()) {
-                        final UUID uuid = childQueue.getQueued().poll();
-
-                        if (uuid != null) {
-                            QueueProxy.getInstance().getJedisManager().publish(
-                                    new JsonAppender("QUEUE_SEND_PLAYER")
-                                            .put("PLAYER_ID", uuid.toString())
-                                            .put("PARENT", parentQueue.getName())
-                                            .put("CHILD", childQueue.getName())
-                                            .getAsJson()
-                            );
-                        }
-
+                    if (serverData == null) {
                         return;
                     }
-                }
+
+                    if (!parentQueue.getSetting("running")) {
+                        return;
+                    }
+
+                    if (serverData.getOnlinePlayers() >= serverData.getMaxPlayers()) {
+                        return;
+                    }
+
+                    final List<ChildQueue> sortedList = parentQueue.getSortedChildren();
+
+                    for (final ChildQueue childQueue : sortedList) {
+                        if (!childQueue.getQueued().isEmpty()) {
+                            final UUID uuid = childQueue.getQueued().poll();
+
+                            if (uuid != null) {
+                                QueueProxy.getInstance().getJedisManager().publish(
+                                        new JsonAppender("QUEUE_SEND_PLAYER")
+                                                .put("PLAYER_ID", uuid.toString())
+                                                .put("PARENT", parentQueue.getName())
+                                                .put("CHILD", childQueue.getName())
+                                                .getAsJson()
+                                );
+
+                                QueueProxy.getInstance().getJedisManager().publish(
+                                        new JsonAppender("QUEUE_REMOVE_PLAYER")
+                                                .put("PARENT", parentQueue.getName())
+                                                .put("CHILD", childQueue.getName())
+                                                .put("PLAYER", uuid.toString())
+                                                .getAsJson()
+                                );
+                            }
+
+                            return;
+                        }
+                    }
+                });
             });
         });
     }

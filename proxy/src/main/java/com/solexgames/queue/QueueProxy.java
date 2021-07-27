@@ -16,12 +16,14 @@ import com.solexgames.xenon.redis.JedisManager;
 import com.solexgames.xenon.redis.json.JsonAppender;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.File;
+import java.net.ProxySelector;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -90,7 +92,6 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
             }
         }, 0L, 5L, TimeUnit.SECONDS);
 
-        final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(() -> new QueueSendRunnable(this.queueHandler), 0L, 1L, TimeUnit.SECONDS);
+        ProxyServer.getInstance().getScheduler().schedule(this, new QueueSendRunnable(this.queueHandler), 0L, 1L, TimeUnit.SECONDS);
     }
 }

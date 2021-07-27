@@ -1,18 +1,18 @@
 package com.solexgames.queue.command;
 
-import com.solexgames.core.CorePlugin;
 import com.solexgames.lib.acf.BaseCommand;
 import com.solexgames.lib.acf.CommandHelp;
 import com.solexgames.lib.acf.InvalidCommandArgument;
 import com.solexgames.lib.acf.annotation.*;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
 import com.solexgames.queue.QueueBukkit;
+import com.solexgames.queue.QueueBukkitConstants;
+import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.model.server.ServerData;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -51,7 +51,20 @@ public class QueueMetaCommand extends BaseCommand {
                         .getAsJson()
         );
 
-        player.sendMessage(ChatColor.YELLOW + "Updated " + ChatColor.GOLD + key + ChatColor.YELLOW + " to " + ChatColor.AQUA + value + ChatColor.YELLOW + ".");
+        player.sendMessage(QueueBukkitConstants.PREFIX + ChatColor.YELLOW + "Updated " + ChatColor.GOLD + key + ChatColor.YELLOW + " to " + ChatColor.AQUA + value + ChatColor.YELLOW + ".");
+    }
+
+    @Subcommand("flush")
+    @Syntax("<queue id>")
+    @Description("Kick all players (in all lanes) out of a parent queue.")
+    public void onFlush(Player player, ParentQueue parentQueue) {
+        QueueBukkit.getInstance().getJedisManager().publish(
+                new JsonAppender("QUEUE_FLUSH")
+                        .put("PARENT", parentQueue.getName())
+                        .getAsJson()
+        );
+
+        player.sendMessage(QueueBukkitConstants.PREFIX + ChatColor.YELLOW + "Flushed parent queue " + ChatColor.GOLD + parentQueue.getFancyName() + ChatColor.YELLOW + ".");
     }
 
     @Subcommand("list")
@@ -103,12 +116,26 @@ public class QueueMetaCommand extends BaseCommand {
             }
 
             if (serverData == null) {
-                throw new InvalidCommandArgument("That server's not online.");
+                throw new InvalidCommandArgument("That server does not exist in our cache.");
             }
 
+            final boolean isQueue = QueueBukkit.getInstance().getQueueHandler().getParentQueueMap().get(serverName) != null;
+
+            player.sendMessage(ChatColor.GOLD + ChatColor.BOLD.toString() + serverName + ":");
             player.sendMessage(" ");
+            player.sendMessage(ChatColor.GRAY + "Queue Server: " + this.getFancyBoolean(isQueue));
             player.sendMessage(" ");
+            player.sendMessage(ChatColor.GRAY + "Online Players: " + ChatColor.WHITE + serverData.getOnlinePlayers());
+            player.sendMessage(ChatColor.GRAY + "Max Players: " + ChatColor.WHITE + serverData.getMaxPlayers());
             player.sendMessage(" ");
+
+            final boolean isHanging = serverData.getLastUpdate() + QueueGlobalConstants.FIFTEEN_SECONDS < System.currentTimeMillis();
+
+            player.sendMessage(ChatColor.GRAY + "Status: " + (isHanging ? ChatColor.RED + "May be offline, we haven't received an update from the server for more than 15 seconds." : ChatColor.GREEN + "Online and Updating"));
         });
+    }
+
+    public String getFancyBoolean(boolean aBoolean) {
+        return aBoolean ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No";
     }
 }

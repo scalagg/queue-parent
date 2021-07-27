@@ -42,25 +42,33 @@ public class ParentQueue extends Queue {
     }
 
     public List<ChildQueue> getSortedChildren() {
-        return this.children.entrySet().stream()
+        final Set<Map.Entry<Integer, ChildQueue>> childQueues = new HashSet<>(this.children.entrySet());
+
+        return childQueues.stream()
                 .sorted(Comparator.comparingInt(Map.Entry::getKey))
                 .map(Map.Entry::getValue).collect(Collectors.toList());
     }
 
     public Optional<ChildQueue> getChildQueue(String name) {
-        return this.children.values().stream()
+        final List<ChildQueue> childQueues = new ArrayList<>(this.children.values());
+
+        return childQueues.stream()
                 .filter(childQueue -> childQueue.getName().equalsIgnoreCase(name))
                 .findFirst();
     }
 
     public Optional<ChildQueue> getChildQueue(UUID uuid) {
-        return this.children.values().stream()
+        final List<ChildQueue> childQueues = new ArrayList<>(this.children.values());
+
+        return childQueues.stream()
                 .filter(childQueue -> childQueue.findQueuePlayerInChildQueue(uuid).isPresent())
                 .findFirst();
     }
 
     public Optional<ChildQueue> getChildQueue(CachedQueuePlayer queuePlayer) {
-        return this.children.values().stream()
+        final List<ChildQueue> childQueues = new ArrayList<>(this.children.values());
+
+        return childQueues.stream()
                 .filter(childQueue -> childQueue.isQueued(queuePlayer))
                 .findFirst();
     }

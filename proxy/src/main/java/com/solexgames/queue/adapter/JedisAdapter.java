@@ -3,16 +3,15 @@ package com.solexgames.queue.adapter;
 import com.solexgames.queue.QueueProxy;
 import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.logger.QueueLogger;
-import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
-import com.solexgames.xenon.CorePlugin;
 import com.solexgames.xenon.redis.annotation.Subscription;
 import com.solexgames.xenon.redis.handler.JedisHandler;
 import com.solexgames.xenon.redis.json.JsonAppender;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author GrowlyX
@@ -52,10 +51,12 @@ public class JedisAdapter implements JedisHandler {
             final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(childQueueName);
 
             childQueueOptional.ifPresent(childQueue -> {
-                childQueue.getQueued().add(uuid);
-
-                QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
-                    jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), QueueGlobalConstants.GSON.toJson(childQueue.getQueued()));
+                CompletableFuture.runAsync(() -> {
+                    childQueue.getQueued().add(uuid);
+                }).whenComplete((aBoolean, throwable) -> {
+                    QueueProxy.getInstance().getJedisManager().get((jedis, throwableTwo) -> {
+                        jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), QueueGlobalConstants.GSON.toJson(childQueue.getQueued()));
+                    });
                 });
             });
         }
@@ -75,12 +76,32 @@ public class JedisAdapter implements JedisHandler {
             final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(childQueueName);
 
             childQueueOptional.ifPresent(childQueue -> {
-                final Optional<UUID> queuePlayer = childQueue.findQueuePlayerInChildQueue(uuid);
+                CompletableFuture.runAsync(() -> {
+                    childQueue.getQueued().remove(uuid);
+                }).whenComplete((aBoolean, throwable) -> {
+                    QueueProxy.getInstance().getJedisManager().get((jedis, throwableTwo) -> {
+                        jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), QueueGlobalConstants.GSON.toJson(childQueue.getQueued()));
+                    });
+                });
+            });
+        }
+    }
 
-                queuePlayer.ifPresent(queuePlayer1 -> {
-                    childQueue.getQueued().remove(queuePlayer1);
+    @Subscription(action = "QUEUE_FLUSH")
+    public void onQueueFlush(JsonAppender jsonAppender) {
+        final String parentQueueName = jsonAppender.getParam("PARENT");
 
-                    QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
+        final ParentQueue parentQueue = QueueProxy.getInstance().getQueueHandler()
+                .getParentQueueMap().get(parentQueueName);
+
+        if (parentQueue != null) {
+            CompletableFuture.runAsync(() -> {
+                parentQueue.getChildren().forEach((integer, childQueue) -> {
+                    childQueue.getQueued().clear();
+                });
+            }).whenComplete((unused1, throwable1) -> {
+                QueueProxy.getInstance().getJedisManager().get((jedis, throwableTwo) -> {
+                    parentQueue.getChildren().forEach((integer, childQueue) -> {
                         jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), QueueGlobalConstants.GSON.toJson(childQueue.getQueued()));
                     });
                 });
