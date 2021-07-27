@@ -50,7 +50,7 @@ public class QueueHandler {
 
             this.parentQueueMap.put(key, parentQueue);
 
-            System.out.println("Loaded parent queue " + key + " with " + children.size() + " child queues.");
+            QueueLogger.log("Loaded parent queue " + key + " with " + children.size() + " child queues.");
         });
 
         QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
@@ -92,6 +92,15 @@ public class QueueHandler {
         });
     }
 
+    /**
+     * Retrieves server data for a specific server
+     * from jedis and returns it in an object form.
+     *
+     * @param serverName The server to get data of
+     *
+     * @return a {@link ServerData} object
+     * @see ServerData
+     */
     public CompletableFuture<ServerData> fetchServerData(String serverName) {
         return CompletableFuture.supplyAsync(() -> {
             final AtomicReference<ServerData> serverDataAtomicReference = new AtomicReference<>();
@@ -106,10 +115,18 @@ public class QueueHandler {
         });
     }
 
+    /**
+     * Finds all queues that a player's queued
+     * in and returns it in a list.
+     *
+     * @param queuePlayer a {@link CachedQueuePlayer} object
+     *
+     * @return All available queues the specified player is queued in
+     */
     public List<ParentQueue> fetchPlayerQueuedIn(CachedQueuePlayer queuePlayer) {
         final List<ParentQueue> parentQueueList = new ArrayList<>();
 
-        for (Map.Entry<String, ParentQueue> stringParentQueueEntry : this.getParentQueueMap().entrySet()) {
+        for (final Map.Entry<String, ParentQueue> stringParentQueueEntry : this.getParentQueueMap().entrySet()) {
             final ParentQueue parentQueue = stringParentQueueEntry.getValue();
 
             if (stringParentQueueEntry.getValue().isQueued(queuePlayer)) {
@@ -120,14 +137,23 @@ public class QueueHandler {
         return parentQueueList;
     }
 
+    /**
+     * Calculates the best possible child queue for a
+     * player based on what permissions they have.
+     *
+     * @param parentQueue The parent queue used to get the child queue from
+     * @param player Player to get best child queue for
+     *
+     * @return a {@link ChildQueue} object
+     */
     public ChildQueue fetchBestChildQueue(ParentQueue parentQueue, Player player) {
-        for (ChildQueue value : parentQueue.getSortedChildren()) {
+        for (final ChildQueue value : parentQueue.getSortedChildren()) {
             if (value.getPermission() != null && player.hasPermission(value.getPermission())) {
                 return value;
             }
         }
 
-        // this should never be null, if it is, something is very very wrong
+        // this should never be null, if it is, something is very very very wrong
         return parentQueue.getChildren().get(0);
     }
 }

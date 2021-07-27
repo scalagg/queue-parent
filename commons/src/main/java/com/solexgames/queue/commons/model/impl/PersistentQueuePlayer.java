@@ -10,7 +10,7 @@ import java.util.UUID;
  * @author GrowlyX
  * @since 7/26/2021
  * <p>
- * Used for storing persistent data
+ * Used for storing persistent data, currently not used
  */
 
 @Getter

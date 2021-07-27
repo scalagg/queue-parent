@@ -94,7 +94,7 @@
         </dependency>
         <dependency>
             <groupId>com.solexgames.core</groupId>
-            <artifactId>scandium-bukkit-yes</artifactId>
+            <artifactId>scandium</artifactId>
             <version>LATEST</version>
             <scope>system</scope>
             <systemPath>${basedir}/lib/Scandium.jar</systemPath>

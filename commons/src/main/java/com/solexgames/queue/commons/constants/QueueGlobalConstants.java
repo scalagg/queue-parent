@@ -13,6 +13,8 @@ import java.util.UUID;
 /**
  * @author GrowlyX
  * @since 7/24/2021
+ * <p>
+ * A collection of useful constants used on all platforms.
  */
 
 @UtilityClass

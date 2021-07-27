@@ -48,6 +48,15 @@ public class QueueHandler {
         });
     }
 
+    /**
+     * Retrieves server data for a specific server
+     * from jedis and returns it in an object form.
+     *
+     * @param serverName The server to get data of
+     *
+     * @return a {@link ServerData} object
+     * @see ServerData
+     */
     public CompletableFuture<ServerData> fetchServerData(String serverName) {
         return CompletableFuture.supplyAsync(() -> {
             final AtomicReference<ServerData> serverDataAtomicReference = new AtomicReference<>();

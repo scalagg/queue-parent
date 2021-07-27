@@ -66,6 +66,20 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
 
         QueuePlatforms.setPlatform(this);
 
+        this.setupTaskSubscriptions();
+
+        this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
+            QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
+                jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), QueueGlobalConstants.GSON.toJson(parentQueue.getSettings()));
+            });
+
+            QueueLogger.log("Setup queue by the name " + parentQueue.getName() + ".");
+        });
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> this.shouldBroadcast = false));
+    }
+
+    private void setupTaskSubscriptions() {
         final ScheduledExecutorService broadcast = Executors.newScheduledThreadPool(1);
         broadcast.scheduleAtFixedRate(() -> {
             if (this.shouldBroadcast) {
@@ -78,15 +92,5 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
 
         final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         executor.scheduleAtFixedRate(() -> new QueueSendRunnable(this.queueHandler), 0L, 1L, TimeUnit.SECONDS);
-
-        this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
-            QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
-                jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), QueueGlobalConstants.GSON.toJson(parentQueue.getSettings()));
-            });
-
-            QueueLogger.log("Setup queue by the name " + parentQueue.getName() + ".");
-        });
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> this.shouldBroadcast = false));
     }
 }

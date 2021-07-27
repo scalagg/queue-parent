@@ -5,6 +5,8 @@ import lombok.Data;
 /**
  * @author GrowlyX
  * @since 7/26/2021
+ * <p>
+ * Stores basic server information
  */
 
 @Data

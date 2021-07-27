@@ -3,11 +3,13 @@ package com.solexgames.queue.adapter;
 import com.solexgames.queue.QueueProxy;
 import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.logger.QueueLogger;
+import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import com.solexgames.xenon.CorePlugin;
 import com.solexgames.xenon.redis.annotation.Subscription;
 import com.solexgames.xenon.redis.handler.JedisHandler;
 import com.solexgames.xenon.redis.json.JsonAppender;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -22,7 +24,9 @@ public class XenonJedisAdapter implements JedisHandler {
         final UUID uuid = UUID.fromString(jsonAppender.getParam("UUID"));
 
         QueueProxy.getInstance().getQueueHandler().getParentQueueMap().forEach((s, parentQueue) -> {
-            parentQueue.getChildQueue(uuid).ifPresent(childQueue -> {
+            final Optional<ChildQueue> optionalChildQueue = parentQueue.getChildQueue(uuid);
+
+            optionalChildQueue.ifPresent(childQueue -> {
                 CorePlugin.getInstance().getJedisManager().publish(
                         new JsonAppender("QUEUE_REMOVE_PLAYER")
                                 .put("PARENT", parentQueue.getName())
