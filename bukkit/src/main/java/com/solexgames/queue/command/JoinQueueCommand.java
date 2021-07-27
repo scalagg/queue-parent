@@ -15,6 +15,7 @@ import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -34,13 +35,16 @@ public class JoinQueueCommand extends BaseCommand {
             throw new InvalidCommandArgument("Something went wrong.");
         }
 
-        final boolean alreadyIn = queuePlayer.getQueueMap().contains(parentQueue.getName());
+        final List<ParentQueue> queuedServers = QueueBukkit.getInstance().getQueueHandler()
+                .fetchPlayerQueuedIn(queuePlayer);
+
+        final boolean alreadyIn = queuedServers.contains(parentQueue);
 
         if (alreadyIn) {
             throw new InvalidCommandArgument("You're already in the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " queue.");
         }
 
-        final int queueAmount = queuePlayer.getQueueMap().size() + 1;
+        final int queueAmount = queuedServers.size() + 1;
 
         if (QueueBukkit.getInstance().getSettings().isAllowMultipleQueues()) {
             if (queueAmount > 2) {
@@ -48,7 +52,7 @@ public class JoinQueueCommand extends BaseCommand {
             }
         } else {
             if (queueAmount > 1) {
-                final String queueName = queuePlayer.getQueueMap().get(0);
+                final String queueName = queuedServers.get(0).getFancyName();
 
                 throw new InvalidCommandArgument("You cannot join " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " as you're queued for " + ChatColor.YELLOW + queueName + ChatColor.RED + ".");
             }
@@ -73,8 +77,6 @@ public class JoinQueueCommand extends BaseCommand {
 
                 player.sendMessage(ChatColor.RED + "We couldn't add you to the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " queue.");
             } else {
-                queuePlayer.getQueueMap().add(parentQueue.getName());
-
                 player.sendMessage(ChatColor.GREEN + "You've been added to the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.GREEN + " queue.");
             }
         });

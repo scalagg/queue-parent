@@ -12,6 +12,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -36,7 +37,10 @@ public class LeaveQueueCommand extends BaseCommand {
             return;
         }
 
-        final int queuesQueuedIn = queuePlayer.getQueueMap().size();
+        final List<ParentQueue> queuedServers = QueueBukkit.getInstance().getQueueHandler()
+                .fetchPlayerQueuedIn(queuePlayer);
+
+        final int queuesQueuedIn = queuedServers.size();
 
         if (queuesQueuedIn > 1) {
             player.sendMessage(ChatColor.RED + "You're currently queued for more than one server.");
@@ -44,14 +48,13 @@ public class LeaveQueueCommand extends BaseCommand {
             player.sendMessage(" ");
             player.sendMessage(ChatColor.GOLD + ChatColor.BOLD.toString() + "Queued Servers:");
 
-            queuePlayer.getQueueMap().forEach(s -> {
-                player.sendMessage(ChatColor.GRAY + " - " + ChatColor.YELLOW + s);
+            queuedServers.forEach(queue -> {
+                player.sendMessage(ChatColor.GRAY + " - " + ChatColor.YELLOW + queue.getName());
             });
             return;
         }
 
-        final ParentQueue fetchedQueue = QueueBukkit.getInstance().getQueueHandler()
-                .getParentQueueMap().getOrDefault(queuePlayer.getQueueMap().size() == 0 ? null : queuePlayer.getQueueMap().get(0), null);
+        final ParentQueue fetchedQueue = queuedServers.size() == 0 ? null : queuedServers.get(0);
 
         if (fetchedQueue != null) {
             this.leaveQueue(fetchedQueue, player, queuePlayer, false);
@@ -76,8 +79,6 @@ public class LeaveQueueCommand extends BaseCommand {
                 if (throwable != null) {
                     throwable.printStackTrace();
                 }
-
-                queuePlayer.getQueueMap().remove(parentQueue.getName());
 
                 player.sendMessage(ChatColor.RED + "You've left the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " queue.");
             });

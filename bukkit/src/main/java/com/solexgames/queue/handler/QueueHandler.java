@@ -4,6 +4,7 @@ import com.solexgames.core.CorePlugin;
 import com.solexgames.queue.QueueBukkit;
 import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.logger.QueueLogger;
+import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import lombok.Getter;
@@ -12,10 +13,7 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author GrowlyX
@@ -90,6 +88,20 @@ public class QueueHandler {
                 });
             }
         });
+    }
+
+    public List<ParentQueue> fetchPlayerQueuedIn(CachedQueuePlayer queuePlayer) {
+        final List<ParentQueue> parentQueueList = new ArrayList<>();
+
+        for (Map.Entry<String, ParentQueue> stringParentQueueEntry : this.getParentQueueMap().entrySet()) {
+            final ParentQueue parentQueue = stringParentQueueEntry.getValue();
+
+            if (stringParentQueueEntry.getValue().isQueued(queuePlayer)) {
+                parentQueueList.add(parentQueue);
+            }
+        }
+
+        return parentQueueList;
     }
 
     public ChildQueue fetchBestChildQueue(ParentQueue parentQueue, Player player) {

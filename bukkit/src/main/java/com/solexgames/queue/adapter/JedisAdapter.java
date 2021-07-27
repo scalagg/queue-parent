@@ -113,7 +113,6 @@ public class JedisAdapter implements JedisHandler {
                     final Player player = Bukkit.getPlayer(uuid);
 
                     if (player != null) {
-                        queuePlayer.getQueueMap().remove(parentQueue.getName());
                         player.sendMessage(ChatColor.GREEN + "You're now being sent to " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.GREEN + ".");
 
                         CompletableFuture.runAsync(() -> {
