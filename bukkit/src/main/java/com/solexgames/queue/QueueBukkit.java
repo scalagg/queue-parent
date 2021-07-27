@@ -47,6 +47,8 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
     private JedisManager jedisManager;
     private JedisManager bungeeJedisManager;
 
+    private String serverName;
+
     private final ConfigFactory factory = ConfigFactory.newFactory(this);
 
     @Override
@@ -56,6 +58,7 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
         QueuePlatforms.setPlatform(this);
 
         this.settings = this.factory.fromFile("settings", QueueBukkitSettings.class);
+        this.serverName = CorePlugin.getInstance().getServerName();
 
         this.saveDefaultConfig();
 

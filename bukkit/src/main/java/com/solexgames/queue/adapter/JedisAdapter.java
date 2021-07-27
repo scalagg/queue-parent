@@ -1,8 +1,5 @@
 package com.solexgames.queue.adapter;
 
-import com.solexgames.core.CorePlugin;
-import com.solexgames.core.enums.NetworkServerStatusType;
-import com.solexgames.core.server.NetworkServer;
 import com.solexgames.lib.commons.redis.annotation.Subscription;
 import com.solexgames.lib.commons.redis.handler.JedisHandler;
 import com.solexgames.lib.commons.redis.json.JsonAppender;

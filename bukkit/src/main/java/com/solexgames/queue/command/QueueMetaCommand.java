@@ -1,6 +1,5 @@
 package com.solexgames.queue.command;
 
-import com.solexgames.core.CorePlugin;
 import com.solexgames.lib.acf.BaseCommand;
 import com.solexgames.lib.acf.CommandHelp;
 import com.solexgames.lib.acf.InvalidCommandArgument;

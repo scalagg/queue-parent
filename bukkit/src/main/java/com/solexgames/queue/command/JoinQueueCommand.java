@@ -1,6 +1,5 @@
 package com.solexgames.queue.command;
 
-import com.solexgames.core.CorePlugin;
 import com.solexgames.lib.acf.BaseCommand;
 import com.solexgames.lib.acf.InvalidCommandArgument;
 import com.solexgames.lib.acf.annotation.CommandAlias;
@@ -8,7 +7,6 @@ import com.solexgames.lib.acf.annotation.Default;
 import com.solexgames.lib.acf.annotation.Syntax;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
 import com.solexgames.queue.QueueBukkit;
-import com.solexgames.queue.QueueBukkitConstants;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;

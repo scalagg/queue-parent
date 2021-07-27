@@ -1,6 +1,5 @@
 package com.solexgames.queue.handler;
 
-import com.solexgames.core.CorePlugin;
 import com.solexgames.queue.QueueBukkit;
 import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.logger.QueueLogger;
