@@ -10,7 +10,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>queue-proxy</artifactId>
+    <artifactId>proxy</artifactId>
 
     <properties>
         <java.version>1.8</java.version>

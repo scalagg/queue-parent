@@ -23,7 +23,7 @@ public class XenonJedisAdapter implements JedisHandler {
     public void onGlobalDisconnect(JsonAppender jsonAppender) {
         final UUID uuid = UUID.fromString(jsonAppender.getParam("UUID"));
 
-        QueueProxy.getInstance().getQueueHandler().getParentQueueMap().forEach((s, parentQueue) -> {
+        QueuePlatforms.get().getQueueHandler().getParentQueueMap().forEach((s, parentQueue) -> {
             final Optional<ChildQueue> optionalChildQueue = parentQueue.getChildQueue(uuid);
 
             optionalChildQueue.ifPresent(childQueue -> {

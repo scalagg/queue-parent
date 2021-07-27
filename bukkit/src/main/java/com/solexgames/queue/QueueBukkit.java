@@ -29,7 +29,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * @author GrowlyX
@@ -41,18 +43,13 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
 
     @Getter
     private static QueueBukkit instance;
-
+    private final ConfigFactory factory = ConfigFactory.newFactory(this);
     private PlayerHandler playerHandler;
-
     private QueueHandler queueHandler;
     private QueueBukkitSettings settings;
-
     private JedisManager jedisManager;
     private JedisManager bungeeJedisManager;
-
     private SettingsProvider settingsProvider;
-
-    private final ConfigFactory factory = ConfigFactory.newFactory(this);
 
     @Override
     public void enable() {
@@ -91,7 +88,7 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
         commandManager.enableUnstableAPI("help");
 
         commandManager.getCommandContexts().registerContext(ParentQueue.class, c -> {
-            final String firstArgument = c.getFirstArg();
+            final String firstArgument = c.popFirstArg();
             final ParentQueue parentQueue = this.getQueueHandler().getParentQueueMap().get(firstArgument);
 
             if (parentQueue == null) {
@@ -100,6 +97,11 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
 
             return parentQueue;
         });
+
+        final List<String> parentQueueNames = this.queueHandler.getParentQueueMap()
+                .values().stream().map(ParentQueue::getName).collect(Collectors.toList());
+
+        commandManager.getCommandCompletions().registerAsyncCompletion("parents", context -> parentQueueNames);
 
         commandManager.registerCommand(new JoinQueueCommand());
         commandManager.registerCommand(new LeaveQueueCommand());

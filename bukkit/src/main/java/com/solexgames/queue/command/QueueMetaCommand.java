@@ -9,6 +9,7 @@ import com.solexgames.queue.QueueBukkit;
 import com.solexgames.queue.QueueBukkitConstants;
 import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.model.server.ServerData;
+import com.solexgames.queue.commons.platform.QueuePlatforms;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -33,6 +34,7 @@ public class QueueMetaCommand extends BaseCommand {
     }
 
     @Subcommand("update")
+    @CommandCompletion("@parents")
     @Syntax("<queue id> <key> <value>")
     @Description("Update a meta data value.")
     public void onDefault(Player player, String parent /* not using object cuz acf weird */, String key, boolean value) {
@@ -56,6 +58,7 @@ public class QueueMetaCommand extends BaseCommand {
 
     @Subcommand("flush")
     @Syntax("<queue id>")
+    @CommandCompletion("@parents")
     @Description("Kick all players (in all lanes) out of a parent queue.")
     public void onFlush(Player player, ParentQueue parentQueue) {
         QueueBukkit.getInstance().getJedisManager().publish(
@@ -69,6 +72,7 @@ public class QueueMetaCommand extends BaseCommand {
 
     @Subcommand("list")
     @Syntax("<queue id>")
+    @CommandCompletion("@parents")
     @Description("List all meta data for a queue.")
     public void onList(Player player, ParentQueue parentQueue) {
         player.sendMessage(ChatColor.GOLD + ChatColor.BOLD.toString() + "Meta Data for " + parentQueue.getFancyName() + ":");
@@ -94,7 +98,7 @@ public class QueueMetaCommand extends BaseCommand {
             }
 
             stringServerDataMap.forEach((s, serverData) -> {
-                final boolean isQueue = QueueBukkit.getInstance().getQueueHandler().getParentQueueMap().get(s) != null;
+                final boolean isQueue = QueuePlatforms.get().getQueueHandler().getParentQueueMap().get(s) != null;
 
                 player.sendMessage(ChatColor.GRAY + " - " + ChatColor.YELLOW + s + ChatColor.GRAY + " (WL: " + (serverData.isWhitelisted() ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No") + ChatColor.GRAY + ") (Queue: " + (isQueue ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No") + ChatColor.GRAY + ")");
             });
@@ -119,7 +123,7 @@ public class QueueMetaCommand extends BaseCommand {
                 throw new InvalidCommandArgument("That server does not exist in our cache.");
             }
 
-            final boolean isQueue = QueueBukkit.getInstance().getQueueHandler().getParentQueueMap().get(serverName) != null;
+            final boolean isQueue = QueuePlatforms.get().getQueueHandler().getParentQueueMap().get(serverName) != null;
 
             player.sendMessage(ChatColor.GOLD + ChatColor.BOLD.toString() + serverName + ":");
             player.sendMessage(" ");

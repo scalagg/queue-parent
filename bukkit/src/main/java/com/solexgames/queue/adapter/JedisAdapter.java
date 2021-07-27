@@ -6,6 +6,7 @@ import com.solexgames.lib.commons.redis.json.JsonAppender;
 import com.solexgames.queue.QueueBukkit;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.model.server.ServerData;
+import com.solexgames.queue.commons.platform.QueuePlatforms;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import org.bukkit.Bukkit;
@@ -153,7 +154,7 @@ public class JedisAdapter implements JedisHandler {
 
     @Subscription(action = "QUEUE_BROADCAST_ALL")
     public void onQueueBroadcast(JsonAppender jsonAppender) {
-        QueueBukkit.getInstance().getQueueHandler().getParentQueueMap().values().forEach(parentQueue -> {
+        QueuePlatforms.get().getQueueHandler().getParentQueueMap().values().forEach(parentQueue -> {
             final CompletableFuture<ServerData> completableFuture = QueueBukkit.getInstance().getQueueHandler()
                     .fetchServerData(parentQueue.getTargetServer());
 

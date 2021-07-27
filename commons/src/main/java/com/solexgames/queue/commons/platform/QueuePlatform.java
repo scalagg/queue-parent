@@ -1,5 +1,7 @@
 package com.solexgames.queue.commons.platform;
 
+import com.solexgames.queue.commons.platform.handler.IQueueHandler;
+
 import java.util.logging.Logger;
 
 /**
@@ -10,5 +12,7 @@ import java.util.logging.Logger;
 public interface QueuePlatform {
 
     Logger getLogger();
+
+    IQueueHandler getQueueHandler();
 
 }

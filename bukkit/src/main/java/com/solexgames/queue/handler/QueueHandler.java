@@ -5,6 +5,7 @@ import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.logger.QueueLogger;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.model.server.ServerData;
+import com.solexgames.queue.commons.platform.handler.IQueueHandler;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import lombok.Getter;
@@ -24,7 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
 @RequiredArgsConstructor
-public class QueueHandler {
+public class QueueHandler implements IQueueHandler {
 
     private final Map<String, ParentQueue> parentQueueMap = new HashMap<>();
 
