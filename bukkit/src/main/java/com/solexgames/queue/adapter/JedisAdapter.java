@@ -58,19 +58,17 @@ public class JedisAdapter implements JedisHandler {
         final String parentQueueName = jsonAppender.getParam("PARENT");
         final String childQueueName = jsonAppender.getParam("CHILD");
 
-        final CachedQueuePlayer queuePlayer = CorePlugin.GSON.fromJson(jsonAppender.getParam("PLAYER"), CachedQueuePlayer.class);
+        final UUID uuid = UUID.fromString(jsonAppender.getParam("PLAYER"));
 
-        if (queuePlayer != null) {
-            final ParentQueue parentQueue = QueueBukkit.getInstance().getQueueHandler()
-                    .getParentQueueMap().get(parentQueueName);
+        final ParentQueue parentQueue = QueueBukkit.getInstance().getQueueHandler()
+                .getParentQueueMap().get(parentQueueName);
 
-            if (parentQueue != null) {
-                final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(childQueueName);
+        if (parentQueue != null) {
+            final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(childQueueName);
 
-                childQueueOptional.ifPresent(childQueue -> {
-                    childQueue.getQueued().add(queuePlayer.getUniqueId());
-                });
-            }
+            childQueueOptional.ifPresent(childQueue -> {
+                childQueue.getQueued().add(uuid);
+            });
         }
     }
 

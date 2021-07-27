@@ -66,7 +66,7 @@ public class JoinQueueCommand extends BaseCommand {
                     new JsonAppender("QUEUE_ADD_PLAYER")
                             .put("PARENT", parentQueue.getName())
                             .put("CHILD", bestChildQueue.getName())
-                            .put("PLAYER", CorePlugin.GSON.toJson(queuePlayer))
+                            .put("PLAYER", queuePlayer.getUniqueId().toString())
                             .getAsJson()
             );
 
