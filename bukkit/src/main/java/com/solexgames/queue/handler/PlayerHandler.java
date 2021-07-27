@@ -30,7 +30,7 @@ public class PlayerHandler extends BasicPlayerCache<CachedQueuePlayer> {
                 final String jedisValue = jedis.hget(QueueGlobalConstants.JEDIS_KEY_PLAYER_CACHE, uniqueId.toString());
 
                 if (jedisValue != null) {
-                    final CachedQueuePlayer queuePlayer = CorePlugin.GSON.fromJson(jedisValue, CachedQueuePlayer.class);
+                    final CachedQueuePlayer queuePlayer = QueueGlobalConstants.GSON.fromJson(jedisValue, CachedQueuePlayer.class);
 
                     if (queuePlayer != null) {
                         atomicReference.set(queuePlayer);
@@ -47,7 +47,7 @@ public class PlayerHandler extends BasicPlayerCache<CachedQueuePlayer> {
 
     public CompletableFuture<Void> updatePlayerDataToRedis(CachedQueuePlayer queuePlayer) {
         return CompletableFuture.runAsync(() -> {
-            final String serialized = CorePlugin.GSON.toJson(queuePlayer);
+            final String serialized = QueueGlobalConstants.GSON.toJson(queuePlayer);
 
             this.jedisManager.runCommand(jedis -> {
                 jedis.hset(QueueGlobalConstants.JEDIS_KEY_PLAYER_CACHE, queuePlayer.getUniqueId().toString(), serialized);

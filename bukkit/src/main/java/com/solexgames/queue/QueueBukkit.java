@@ -17,7 +17,9 @@ import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.handler.PlayerHandler;
 import com.solexgames.queue.handler.QueueHandler;
 import com.solexgames.queue.internal.QueueBukkitSettings;
+import com.solexgames.queue.runnable.QueueServerUpdateRunnable;
 import me.lucko.helper.Events;
+import me.lucko.helper.Schedulers;
 import me.lucko.helper.plugin.ExtendedJavaPlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
@@ -62,6 +64,11 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
         this.setupCommandManager();
 
         this.setupEventSubscriptions();
+        this.setupTaskSubscriptions();
+    }
+
+    private void setupTaskSubscriptions() {
+        Schedulers.async().runRepeating(new QueueServerUpdateRunnable(this.jedisManager), 0L, 100L);
     }
 
     private void setupCommandManager() {

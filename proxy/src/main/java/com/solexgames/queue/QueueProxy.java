@@ -9,6 +9,7 @@ import com.solexgames.queue.commons.platform.QueuePlatform;
 import com.solexgames.queue.commons.platform.QueuePlatforms;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import com.solexgames.queue.handler.QueueHandler;
+import com.solexgames.queue.runnable.QueueSendRunnable;
 import com.solexgames.xenon.CorePlugin;
 import com.solexgames.xenon.redis.JedisBuilder;
 import com.solexgames.xenon.redis.JedisManager;
@@ -46,7 +47,7 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
         instance = this;
 
         final Configuration configuration = ConfigurationProvider.getProvider(YamlConfiguration.class)
-                .load(new File(getDataFolder(), "config.yml"));
+                .load(new File(this.getDataFolder(), "config.yml"));
 
         this.queueHandler = new QueueHandler(configuration);
         this.queueHandler.loadQueuesFromConfiguration();
@@ -76,33 +77,11 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
         }, 0L, 5L, TimeUnit.SECONDS);
 
         final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(() -> {
-            this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
-                if (parentQueue.getSetting("running")) {
-                    final List<ChildQueue> sortedList = parentQueue.getSortedChildren();
-
-                    for (final ChildQueue childQueue : sortedList) {
-                        if (!childQueue.getQueued().isEmpty()) {
-                            final UUID queuePlayer = childQueue.getQueued().poll();
-
-                            if (queuePlayer != null) {
-                                QueueProxy.getInstance().getJedisManager().publish(
-                                        new JsonAppender("QUEUE_SEND_PLAYER")
-                                                .put("PLAYER_ID", queuePlayer.toString())
-                                                .put("PARENT", parentQueue.getName())
-                                                .put("CHILD", childQueue.getName())
-                                                .getAsJson()
-                                );
-                            }
-                        }
-                    }
-                }
-            });
-        }, 0L, 1L, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(() -> new QueueSendRunnable(this.queueHandler), 0L, 1L, TimeUnit.SECONDS);
 
         this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
             QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
-                jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), CorePlugin.GSON.toJson(parentQueue.getSettings()));
+                jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), QueueGlobalConstants.GSON.toJson(parentQueue.getSettings()));
             });
 
             QueueLogger.log("Setup queue by the name " + parentQueue.getName() + ".");

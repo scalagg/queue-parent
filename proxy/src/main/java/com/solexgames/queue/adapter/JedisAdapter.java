@@ -33,7 +33,7 @@ public class JedisAdapter implements JedisHandler {
             QueueLogger.log("Updated settings for " + parentQueueName);
 
             QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
-                jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), CorePlugin.GSON.toJson(parentQueue.getSettings()));
+                jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), QueueGlobalConstants.GSON.toJson(parentQueue.getSettings()));
             });
         }
     }
@@ -55,7 +55,7 @@ public class JedisAdapter implements JedisHandler {
                 childQueue.getQueued().add(uuid);
 
                 QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
-                    jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), CorePlugin.GSON.toJson(childQueue.getQueued()));
+                    jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), QueueGlobalConstants.GSON.toJson(childQueue.getQueued()));
                 });
             });
         }
@@ -81,7 +81,7 @@ public class JedisAdapter implements JedisHandler {
                     childQueue.getQueued().remove(queuePlayer1);
 
                     QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
-                        jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), CorePlugin.GSON.toJson(childQueue.getQueued()));
+                        jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), QueueGlobalConstants.GSON.toJson(childQueue.getQueued()));
                     });
                 });
             });

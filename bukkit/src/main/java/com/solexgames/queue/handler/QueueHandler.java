@@ -5,6 +5,7 @@ import com.solexgames.queue.QueueBukkit;
 import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.logger.QueueLogger;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
+import com.solexgames.queue.commons.model.server.ServerData;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import lombok.Getter;
@@ -14,6 +15,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author GrowlyX
@@ -65,7 +68,7 @@ public class QueueHandler {
                             final Optional<ChildQueue> childQueueOptional = parentQueue.getChildQueue(dataSplit[1]);
 
                             childQueueOptional.ifPresent(childQueue -> {
-                                childQueue.setQueued(CorePlugin.GSON.fromJson(s2, QueueGlobalConstants.PRIORITY_QUEUE_PLAYER_TYPE));
+                                childQueue.setQueued(QueueGlobalConstants.GSON.fromJson(s2, QueueGlobalConstants.PRIORITY_QUEUE_PLAYER_TYPE));
                             });
                         }
                     } else {
@@ -83,10 +86,24 @@ public class QueueHandler {
                     final ParentQueue parentQueue = this.parentQueueMap.get(s);
 
                     if (parentQueue != null) {
-                        parentQueue.setSettings(CorePlugin.GSON.fromJson(s2, QueueGlobalConstants.STRING_BOOLEAN_MAP_TYPE));
+                        parentQueue.setSettings(QueueGlobalConstants.GSON.fromJson(s2, QueueGlobalConstants.STRING_BOOLEAN_MAP_TYPE));
                     }
                 });
             }
+        });
+    }
+
+    public CompletableFuture<ServerData> fetchServerData(String serverName) {
+        return CompletableFuture.supplyAsync(() -> {
+            final AtomicReference<ServerData> serverDataAtomicReference = new AtomicReference<>();
+
+            QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
+                final String jedisValue = jedis.hget(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE, serverName);
+
+                serverDataAtomicReference.set(QueueGlobalConstants.GSON.fromJson(jedisValue, ServerData.class));
+            });
+
+            return serverDataAtomicReference.get();
         });
     }
 

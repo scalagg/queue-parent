@@ -8,6 +8,7 @@ import com.solexgames.lib.commons.redis.handler.JedisHandler;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
 import com.solexgames.queue.QueueBukkit;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
+import com.solexgames.queue.commons.model.server.ServerData;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import org.bukkit.Bukkit;
@@ -142,30 +143,38 @@ public class JedisAdapter implements JedisHandler {
     @Subscription(action = "QUEUE_BROADCAST_ALL")
     public void onQueueBroadcast(JsonAppender jsonAppender) {
         QueueBukkit.getInstance().getQueueHandler().getParentQueueMap().values().forEach(parentQueue -> {
-            parentQueue.getChildren().forEach((integer, childQueue) -> {
-                if (childQueue.getQueued() != null) {
-                    childQueue.getQueued().forEach(queuePlayer -> {
-                        final Player bukkitPlayer = Bukkit.getPlayer(queuePlayer);
+            final CompletableFuture<ServerData> completableFuture = QueueBukkit.getInstance().getQueueHandler()
+                    .fetchServerData(parentQueue.getTargetServer());
 
-                        if (bukkitPlayer != null) {
-                            final NetworkServer networkServer = NetworkServer.getByName(parentQueue.getTargetServer());
-                            final CachedQueuePlayer queuePlayer1 = QueueBukkit.getInstance().getPlayerHandler().getByUuid(queuePlayer);
+            completableFuture.whenComplete((serverData, throwable) -> {
+               if (throwable != null) {
+                   throwable.printStackTrace();
+               }
 
-                            if (networkServer == null) {
-                                this.sendNonJoinable(bukkitPlayer, queuePlayer1, childQueue, "offline");
-                                return;
+                parentQueue.getChildren().forEach((integer, childQueue) -> {
+                    if (childQueue.getQueued() != null) {
+                        childQueue.getQueued().forEach(uuid -> {
+                            final Player bukkitPlayer = Bukkit.getPlayer(uuid);
+
+                            if (bukkitPlayer != null) {
+                                final CachedQueuePlayer queuePlayer = QueueBukkit.getInstance().getPlayerHandler().getByUuid(uuid);
+
+                                if (serverData == null) {
+                                    this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, "offline");
+                                    return;
+                                }
+
+                                if (serverData.isWhitelisted()) {
+                                    this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, "whitelisted");
+                                } else if (serverData.getOnlinePlayers() >= serverData.getMaxPlayers()) {
+                                    this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, "full");
+                                } else {
+                                    this.sendJoinable(bukkitPlayer, queuePlayer, childQueue);
+                                }
                             }
-
-                            if (networkServer.isWhitelistEnabled()) {
-                                this.sendNonJoinable(bukkitPlayer, queuePlayer1, childQueue, "whitelisted");
-                            } else if (networkServer.getServerStatus().equals(NetworkServerStatusType.ONLINE)) {
-                                this.sendJoinable(bukkitPlayer, queuePlayer1, childQueue);
-                            } else {
-                                this.sendNonJoinable(bukkitPlayer, queuePlayer1, childQueue, networkServer.getServerStatus().getServerStatusString().toLowerCase());
-                            }
-                        }
-                    });
-                }
+                        });
+                    }
+                });
             });
         });
     }

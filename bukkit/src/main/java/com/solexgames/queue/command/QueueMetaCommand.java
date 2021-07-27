@@ -61,4 +61,10 @@ public class QueueMetaCommand extends BaseCommand {
             player.sendMessage(ChatColor.GRAY + " - " + ChatColor.YELLOW + s + ChatColor.GOLD + " (" + aBoolean + ")");
         });
     }
+
+    @Subcommand("list-all-queues")
+    @Description("Fetch and return all available queues and their information.")
+    public void onQueueList(Player player) {
+
+    }
 }

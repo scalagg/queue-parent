@@ -1,5 +1,8 @@
 package com.solexgames.queue.handler;
 
+import com.solexgames.queue.QueueProxy;
+import com.solexgames.queue.commons.constants.QueueGlobalConstants;
+import com.solexgames.queue.commons.model.server.ServerData;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import lombok.Getter;
@@ -7,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.config.Configuration;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author GrowlyX
@@ -40,6 +45,20 @@ public class QueueHandler {
             });
 
             this.parentQueueMap.put(key, parentQueue);
+        });
+    }
+
+    public CompletableFuture<ServerData> fetchServerData(String serverName) {
+        return CompletableFuture.supplyAsync(() -> {
+            final AtomicReference<ServerData> serverDataAtomicReference = new AtomicReference<>();
+
+            QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
+                final String jedisValue = jedis.hget(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE, serverName);
+
+                serverDataAtomicReference.set(QueueGlobalConstants.GSON.fromJson(jedisValue, ServerData.class));
+            });
+
+            return serverDataAtomicReference.get();
         });
     }
 }
