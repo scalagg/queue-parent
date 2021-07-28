@@ -8,10 +8,10 @@ import com.solexgames.queue.QueueBukkit;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
+import com.solexgames.queue.internal.QueueBukkitSettings;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -22,6 +22,9 @@ import java.util.concurrent.CompletableFuture;
 
 @CommandAlias("leavequeue|leaveq")
 public class LeaveQueueCommand extends BaseCommand {
+
+    @Dependency
+    private QueueBukkitSettings settings;
 
     @Default
     @Syntax("[optional: <queue id>]")
@@ -80,7 +83,7 @@ public class LeaveQueueCommand extends BaseCommand {
                     throwable.printStackTrace();
                 }
 
-                player.sendMessage(ChatColor.RED + "You've left the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " queue.");
+                player.sendMessage(this.settings.getLeaveQueueMessage().replace("<queue>", parentQueue.getFancyName()));
             });
         } else {
             player.sendMessage(ChatColor.RED + "You're not currently queued for " + (specified ? ChatColor.YELLOW + parentQueue.getFancyName() : "a server") + ChatColor.RED + ".");

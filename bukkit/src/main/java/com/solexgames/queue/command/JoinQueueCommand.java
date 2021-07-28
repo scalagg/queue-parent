@@ -4,12 +4,14 @@ import com.solexgames.lib.acf.BaseCommand;
 import com.solexgames.lib.acf.InvalidCommandArgument;
 import com.solexgames.lib.acf.annotation.CommandAlias;
 import com.solexgames.lib.acf.annotation.Default;
+import com.solexgames.lib.acf.annotation.Dependency;
 import com.solexgames.lib.acf.annotation.Syntax;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
 import com.solexgames.queue.QueueBukkit;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
+import com.solexgames.queue.internal.QueueBukkitSettings;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -23,6 +25,9 @@ import java.util.concurrent.CompletableFuture;
 
 @CommandAlias("joinqueue|joinq|queue")
 public class JoinQueueCommand extends BaseCommand {
+
+    @Dependency
+    private QueueBukkitSettings settings;
 
     @Default
     @Syntax("<queue id>")
@@ -75,7 +80,7 @@ public class JoinQueueCommand extends BaseCommand {
 
                 player.sendMessage(ChatColor.RED + "We couldn't add you to the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " queue.");
             } else {
-                player.sendMessage(ChatColor.GREEN + "You've been added to the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.GREEN + " queue.");
+                player.sendMessage(this.settings.getJoinQueueMessage().replace("<queue>", parentQueue.getFancyName()));
             }
         });
     }

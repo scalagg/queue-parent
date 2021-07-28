@@ -24,23 +24,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class JedisAdapter implements JedisHandler {
 
-    private static final String[] QUEUE_LANE_CANNOT_JOIN_MESSAGE = new String[]{
-            "",
-            ChatColor.YELLOW + "<name> Queue Position: " + ChatColor.GOLD + "<position>" + ChatColor.YELLOW + "/" + ChatColor.GOLD + "<max>",
-            ChatColor.GRAY + ChatColor.ITALIC.toString() + "<other>",
-            ChatColor.GRAY + ChatColor.ITALIC.toString() + "You can leave the queue by executing: /leavequeue",
-            ChatColor.RED + "The server you're queued for is currently <server_status>.",
-            "",
-    };
-
-    private static final String[] QUEUE_LANE_CAN_JOIN_MESSAGE = new String[]{
-            "",
-            ChatColor.YELLOW + "<name> Queue Position: " + ChatColor.GOLD + "<position>" + ChatColor.YELLOW + "/" + ChatColor.GOLD + "<max>",
-            ChatColor.GRAY + ChatColor.ITALIC.toString() + "<other>",
-            ChatColor.GRAY + ChatColor.ITALIC.toString() + "You can leave the queue by executing: /leavequeue",
-            "",
-    };
-
     @Subscription(action = "QUEUE_DATA_UPDATE")
     public void onQueueDataUpdate(JsonAppender jsonAppender) {
         final String parentQueueName = jsonAppender.getParam("PARENT");
@@ -172,16 +155,20 @@ public class JedisAdapter implements JedisHandler {
                                 final CachedQueuePlayer queuePlayer = QueueBukkit.getInstance().getPlayerHandler().getByUuid(uuid);
 
                                 if (serverData == null) {
-                                    this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, "offline");
+                                    QueueBukkit.getInstance().getFormatterHandler()
+                                            .sendCannotJoinMessageToPlayer(bukkitPlayer, queuePlayer, childQueue, "offline");
                                     return;
                                 }
 
                                 if (serverData.isWhitelisted()) {
-                                    this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, "whitelisted");
+                                    QueueBukkit.getInstance().getFormatterHandler()
+                                            .sendCannotJoinMessageToPlayer(bukkitPlayer, queuePlayer, childQueue, "whitelisted");
                                 } else if (serverData.getOnlinePlayers() >= serverData.getMaxPlayers()) {
-                                    this.sendNonJoinable(bukkitPlayer, queuePlayer, childQueue, "full");
+                                    QueueBukkit.getInstance().getFormatterHandler()
+                                            .sendCannotJoinMessageToPlayer(bukkitPlayer, queuePlayer, childQueue, "full");
                                 } else {
-                                    this.sendJoinable(bukkitPlayer, queuePlayer, childQueue);
+                                    QueueBukkit.getInstance().getFormatterHandler()
+                                            .sendCanJoinMessageToPlayer(bukkitPlayer, queuePlayer, childQueue);
                                 }
                             }
                         });
@@ -189,28 +176,5 @@ public class JedisAdapter implements JedisHandler {
                 });
             });
         });
-    }
-
-    public void sendNonJoinable(Player player, CachedQueuePlayer queuePlayer, ChildQueue childQueue, String status) {
-        for (String message : JedisAdapter.QUEUE_LANE_CANNOT_JOIN_MESSAGE) {
-            player.sendMessage(message
-                    .replace("<name>", childQueue.getParent().getFancyName())
-                    .replace("<position>", String.valueOf(childQueue.getPosition(queuePlayer)))
-                    .replace("<max>", String.valueOf(childQueue.getAllQueued()))
-                    .replace("<other>", (childQueue.getName().equals("normal") ? ChatColor.GRAY + ChatColor.ITALIC.toString() + "Want access to the fast pass? Purchase access at " + ChatColor.GOLD + "store.pvp.bar" + ChatColor.GRAY + ChatColor.ITALIC.toString() + "." : ChatColor.GRAY + ChatColor.ITALIC.toString() + "You're in the " + childQueue.getFancyName() + ChatColor.GRAY + ChatColor.ITALIC.toString() + " lane."))
-                    .replace("<server_status>", status)
-            );
-        }
-    }
-
-    public void sendJoinable(Player player, CachedQueuePlayer queuePlayer, ChildQueue childQueue) {
-        for (String message : JedisAdapter.QUEUE_LANE_CAN_JOIN_MESSAGE) {
-            player.sendMessage(message
-                    .replace("<name>", childQueue.getParent().getFancyName())
-                    .replace("<position>", String.valueOf(childQueue.getPosition(queuePlayer)))
-                    .replace("<max>", String.valueOf(childQueue.getAllQueued()))
-                    .replace("<other>", (childQueue.getName().equals("normal") ? ChatColor.GRAY + ChatColor.ITALIC.toString() + "Want access to the fast pass? Purchase access at " + ChatColor.GOLD + "store.pvp.bar" + ChatColor.GRAY + ChatColor.ITALIC.toString() + "." : ChatColor.GRAY + ChatColor.ITALIC.toString() + "You're in the " + childQueue.getFancyName() + ChatColor.GRAY + ChatColor.ITALIC.toString() + " lane."))
-            );
-        }
     }
 }

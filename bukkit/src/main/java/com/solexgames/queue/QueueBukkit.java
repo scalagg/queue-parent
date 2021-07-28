@@ -13,6 +13,7 @@ import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.platform.QueuePlatform;
 import com.solexgames.queue.commons.platform.QueuePlatforms;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
+import com.solexgames.queue.handler.FormatterHandler;
 import com.solexgames.queue.handler.PlayerHandler;
 import com.solexgames.queue.handler.QueueHandler;
 import com.solexgames.queue.internal.QueueBukkitSettings;
@@ -43,13 +44,18 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
 
     @Getter
     private static QueueBukkit instance;
-    private final ConfigFactory factory = ConfigFactory.newFactory(this);
+
     private PlayerHandler playerHandler;
     private QueueHandler queueHandler;
-    private QueueBukkitSettings settings;
+    private FormatterHandler formatterHandler;
+
     private JedisManager jedisManager;
     private JedisManager bungeeJedisManager;
+
     private SettingsProvider settingsProvider;
+    private QueueBukkitSettings settings;
+
+    private final ConfigFactory factory = ConfigFactory.newFactory(this);
 
     @Override
     public void enable() {
@@ -103,9 +109,13 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
 
         commandManager.getCommandCompletions().registerAsyncCompletion("parents", context -> parentQueueNames);
 
+        commandManager.registerDependency(QueueBukkitSettings.class, this.settings);
+
         commandManager.registerCommand(new JoinQueueCommand());
         commandManager.registerCommand(new LeaveQueueCommand());
         commandManager.registerCommand(new QueueMetaCommand());
+
+        this.formatterHandler = new FormatterHandler(this.settings);
     }
 
     private void setupQueueHandler() {
