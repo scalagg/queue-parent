@@ -124,18 +124,18 @@ public class QueueMetaCommand extends BaseCommand {
             }
 
             final boolean isQueue = QueuePlatforms.get().getQueueHandler().getParentQueueMap().get(serverName) != null;
-
-            player.sendMessage(ChatColor.GOLD + ChatColor.BOLD.toString() + serverName + ":");
-            player.sendMessage(" ");
-            player.sendMessage(ChatColor.GRAY + "Queue Server: " + this.getFancyBoolean(isQueue));
-            player.sendMessage(" ");
-            player.sendMessage(ChatColor.GRAY + "Online Players: " + ChatColor.WHITE + serverData.getOnlinePlayers());
-            player.sendMessage(ChatColor.GRAY + "Max Players: " + ChatColor.WHITE + serverData.getMaxPlayers());
-            player.sendMessage(" ");
-
             final boolean isHanging = serverData.getLastUpdate() + QueueGlobalConstants.FIFTEEN_SECONDS < System.currentTimeMillis();
 
-            player.sendMessage(ChatColor.GRAY + "Status: " + (isHanging ? ChatColor.RED + "May be offline, we haven't received an update from the server for more than 15 seconds." : ChatColor.GREEN + "Online and Updating"));
+            player.sendMessage(new String[]{
+                    ChatColor.GOLD + ChatColor.BOLD.toString() + serverName + ":",
+                    " ",
+                    ChatColor.GRAY + "Queueable: " + this.getFancyBoolean(isQueue),
+                    " ",
+                    ChatColor.GRAY + "Online Players: " + ChatColor.WHITE + serverData.getOnlinePlayers(),
+                    ChatColor.GRAY + "Max Players: " + ChatColor.WHITE + serverData.getMaxPlayers(),
+                    " ",
+                    ChatColor.GRAY + "Status: " + (isHanging ? ChatColor.RED + "May be offline, we haven't received an update from the server for more than 15 seconds." : ChatColor.GREEN + "Online and Updating")
+            });
         });
     }
 

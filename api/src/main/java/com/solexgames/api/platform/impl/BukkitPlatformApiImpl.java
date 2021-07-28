@@ -10,6 +10,7 @@ import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import org.bukkit.Bukkit;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -105,7 +106,15 @@ public class BukkitPlatformApiImpl implements PlatformDependantApi {
 
     @Override
     public List<ParentQueue> getParentQueuesByPlayer(CachedQueuePlayer cachedQueuePlayer) {
-        return QueueBukkit.getInstance().getQueueHandler().fetchPlayerQueuedIn(cachedQueuePlayer);
+        final List<ParentQueue> parentQueues = new ArrayList<>();
+
+        QueuePlatforms.get().getQueueHandler().getParentQueueMap().forEach((s, parentQueue) -> {
+            if (parentQueue.isQueued(cachedQueuePlayer)) {
+                parentQueues.add(parentQueue);
+            }
+        });
+
+        return parentQueues;
     }
 
     @Override

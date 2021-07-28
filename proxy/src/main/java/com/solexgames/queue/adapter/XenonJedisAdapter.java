@@ -3,6 +3,7 @@ package com.solexgames.queue.adapter;
 import com.solexgames.queue.QueueProxy;
 import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.logger.QueueLogger;
+import com.solexgames.queue.commons.platform.QueuePlatforms;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 import com.solexgames.xenon.CorePlugin;
 import com.solexgames.xenon.redis.annotation.Subscription;

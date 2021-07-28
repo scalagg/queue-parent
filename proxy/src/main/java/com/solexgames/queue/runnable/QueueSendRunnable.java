@@ -34,11 +34,15 @@ public class QueueSendRunnable implements Runnable {
                         throwable.printStackTrace();
                     }
 
-                    if (serverData == null) {
+                    if (serverData == null || serverData.getLastUpdate() + QueueGlobalConstants.FIFTEEN_SECONDS < System.currentTimeMillis()) {
                         return;
                     }
 
                     if (!parentQueue.getSetting("running")) {
+                        return;
+                    }
+
+                    if (serverData.isWhitelisted()) {
                         return;
                     }
 

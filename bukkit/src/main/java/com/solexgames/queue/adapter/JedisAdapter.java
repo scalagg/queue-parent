@@ -4,6 +4,7 @@ import com.solexgames.lib.commons.redis.annotation.Subscription;
 import com.solexgames.lib.commons.redis.handler.JedisHandler;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
 import com.solexgames.queue.QueueBukkit;
+import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.model.server.ServerData;
 import com.solexgames.queue.commons.platform.QueuePlatforms;
@@ -154,7 +155,7 @@ public class JedisAdapter implements JedisHandler {
                             if (bukkitPlayer != null) {
                                 final CachedQueuePlayer queuePlayer = QueueBukkit.getInstance().getPlayerHandler().getByUuid(uuid);
 
-                                if (serverData == null) {
+                                if (serverData == null || serverData.getLastUpdate() + QueueGlobalConstants.FIFTEEN_SECONDS < System.currentTimeMillis()) {
                                     QueueBukkit.getInstance().getFormatterHandler()
                                             .sendCannotJoinMessageToPlayer(bukkitPlayer, queuePlayer, childQueue, "offline");
                                     return;

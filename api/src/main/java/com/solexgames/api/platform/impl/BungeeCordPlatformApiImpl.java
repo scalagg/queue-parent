@@ -10,6 +10,7 @@ import com.solexgames.queue.commons.platform.QueuePlatforms;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -68,8 +69,16 @@ public class BungeeCordPlatformApiImpl implements PlatformDependantApi {
     }
 
     @Override
-    public List<ParentQueue> getParentQueuesByPlayer(CachedQueuePlayer uuid) {
-        throw new UnsupportedOperationException("BungeeCordPlatformApiImpl#getCachedQueuePlayer is not supported.");
+    public List<ParentQueue> getParentQueuesByPlayer(CachedQueuePlayer cachedQueuePlayer) {
+        final List<ParentQueue> parentQueues = new ArrayList<>();
+
+        QueuePlatforms.get().getQueueHandler().getParentQueueMap().forEach((s, parentQueue) -> {
+            if (parentQueue.isQueued(cachedQueuePlayer)) {
+                parentQueues.add(parentQueue);
+            }
+        });
+
+        return parentQueues;
     }
 
     @Override
