@@ -120,7 +120,8 @@ public class QueueMetaCommand extends BaseCommand {
             }
 
             if (serverData == null) {
-                throw new InvalidCommandArgument("That server does not exist in our cache.");
+                player.sendMessage(ChatColor.RED + "That server does not exist in our cache.");
+                return;
             }
 
             final boolean isQueue = QueuePlatforms.get().getQueueHandler().getParentQueueMap().get(serverName) != null;

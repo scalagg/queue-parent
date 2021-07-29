@@ -26,11 +26,7 @@ public class ChildQueue extends Queue {
     private final String fancyName;
     private final String permission;
 
-    private PriorityQueue<UUID> queued;
-
-    {
-        this.queued = new PriorityQueue<>();
-    }
+    private PriorityQueue<UUID> queued = new PriorityQueue<>();
 
     public int getAllQueued() {
         return this.queued.size();
