@@ -3,6 +3,7 @@ package com.solexgames.api;
 import com.solexgames.api.platform.PlatformDependantApi;
 import com.solexgames.api.platform.impl.BukkitPlatformApiImpl;
 import com.solexgames.api.platform.impl.BungeeCordPlatformApiImpl;
+import com.solexgames.queue.commons.cache.ClassCache;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,17 +13,27 @@ import java.util.Map;
  * @since 7/27/2021
  */
 
-@SuppressWarnings("all")
-public class QueuePlatformAPI {
+public class QueuePlatformAPI extends ClassCache<PlatformDependantApi> {
 
-    private static final Map<Class<? extends PlatformDependantApi>, PlatformDependantApi> PLATFORM_DEPENDANT_API_MAP = new HashMap<>();
+    private static final QueuePlatformAPI INSTANCE;
 
     static {
-        PLATFORM_DEPENDANT_API_MAP.put(BukkitPlatformApiImpl.class, new BukkitPlatformApiImpl());
-        PLATFORM_DEPENDANT_API_MAP.put(BungeeCordPlatformApiImpl.class, new BungeeCordPlatformApiImpl());
+        INSTANCE = new QueuePlatformAPI();
     }
 
-    public static <T> T get(Class<T> clazz) {
-        return (T) QueuePlatformAPI.PLATFORM_DEPENDANT_API_MAP.getOrDefault(clazz, null);
+    private final Map<Class<? extends PlatformDependantApi>, PlatformDependantApi> classPlatformDependantApiMap = new HashMap<>();
+
+    {
+        this.getCache().put(BukkitPlatformApiImpl.class, new BukkitPlatformApiImpl());
+        this.getCache().put(BungeeCordPlatformApiImpl.class, new BungeeCordPlatformApiImpl());
+    }
+
+    @Override
+    public Map<Class<? extends PlatformDependantApi>, PlatformDependantApi> getCache() {
+        return this.classPlatformDependantApiMap;
+    }
+
+    public static QueuePlatformAPI get() {
+        return QueuePlatformAPI.INSTANCE;
     }
 }

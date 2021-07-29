@@ -6,6 +6,7 @@ import com.solexgames.lib.commons.redis.JedisBuilder;
 import com.solexgames.lib.commons.redis.JedisManager;
 import com.solexgames.lib.processor.config.ConfigFactory;
 import com.solexgames.queue.adapter.JedisAdapter;
+import com.solexgames.queue.cache.NamingSchemeCache;
 import com.solexgames.queue.command.JoinQueueCommand;
 import com.solexgames.queue.command.LeaveQueueCommand;
 import com.solexgames.queue.command.QueueMetaCommand;
@@ -13,6 +14,7 @@ import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.platform.QueuePlatform;
 import com.solexgames.queue.commons.platform.QueuePlatforms;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
+import com.solexgames.queue.commons.scheme.NamingScheme;
 import com.solexgames.queue.handler.FormatterHandler;
 import com.solexgames.queue.handler.PlayerHandler;
 import com.solexgames.queue.handler.QueueHandler;
@@ -108,6 +110,11 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
                 .values().stream().map(ParentQueue::getName).collect(Collectors.toList());
 
         commandManager.getCommandCompletions().registerAsyncCompletion("parents", context -> parentQueueNames);
+
+        final List<String> schemeNames = NamingSchemeCache.get().getCache()
+                .values().stream().map(namingScheme -> namingScheme.getClass().getSimpleName()).collect(Collectors.toList());
+
+        commandManager.getCommandCompletions().registerAsyncCompletion("schemes", context -> schemeNames);
 
         commandManager.registerDependency(QueueBukkitSettings.class, this.settings);
 
