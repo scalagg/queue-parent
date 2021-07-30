@@ -1,8 +1,10 @@
 package com.solexgames.queue.provider.impl;
 
+import com.solexgames.core.CorePlugin;
 import com.solexgames.lib.commons.redis.JedisSettings;
 import com.solexgames.queue.provider.SettingsProvider;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.Configuration;
 
 /**
@@ -28,5 +30,10 @@ public class DefaultSettingsProvider implements SettingsProvider {
                 this.configuration.getBoolean("redis.authentication.enabled"),
                 this.configuration.getString("redis.authentication.password")
         );
+    }
+
+    @Override
+    public boolean canJoin() {
+        return Bukkit.hasWhitelist();
     }
 }

@@ -20,4 +20,9 @@ public class ScandiumSettingsProvider implements SettingsProvider {
     public JedisSettings getJedisSettings() {
         return CorePlugin.getInstance().getDefaultJedisSettings();
     }
+
+    @Override
+    public boolean canJoin() {
+        return CorePlugin.getInstance().getServerSettings().isCanJoin();
+    }
 }

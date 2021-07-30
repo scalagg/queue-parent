@@ -16,4 +16,6 @@ public interface SettingsProvider {
 
     JedisSettings getJedisSettings();
 
+    boolean canJoin();
+
 }
