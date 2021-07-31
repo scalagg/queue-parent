@@ -5,9 +5,12 @@ import com.solexgames.queue.QueueBukkit;
 import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.model.server.ServerData;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +34,7 @@ public class QueueServerUpdateRunnable implements Runnable {
 
             this.serverData.setMaxPlayers(Bukkit.getMaxPlayers());
             this.serverData.setOnlinePlayers(Bukkit.getOnlinePlayers().size());
-            this.serverData.setWhitelisted(QueueBukkit.getInstance().getSettingsProvider().canJoin() || Bukkit.hasWhitelist());
+            this.serverData.setWhitelisted(QueueBukkit.getInstance().getSettingsProvider().canJoin() && this.isWhitelistEnabled());
             this.serverData.setWhitelistedPlayers(whitelistedPlayers);
             this.serverData.setLastUpdate(System.currentTimeMillis());
 
@@ -41,5 +44,17 @@ public class QueueServerUpdateRunnable implements Runnable {
                     QueueGlobalConstants.GSON.toJson(this.serverData)
             );
         });
+    }
+
+    /**
+     * We're reading the server.properties file as
+     * Bukkit#getWhitelist is a bit funky
+     * <p>
+     * @return true if the server's whitelisted
+     */
+    @SneakyThrows
+    private boolean isWhitelistEnabled() {
+        return new String(Files.readAllBytes(new File("server.properties").toPath()))
+                .contains("white-list=true");
     }
 }

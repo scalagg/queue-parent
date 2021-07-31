@@ -57,6 +57,8 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
     private SettingsProvider settingsProvider;
     private QueueBukkitSettings settings;
 
+    private QueueServerUpdateRunnable updateRunnable;
+
     private final ConfigFactory factory = ConfigFactory.newFactory(this);
 
     @Override
@@ -87,7 +89,7 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
     }
 
     private void setupTaskSubscriptions() {
-        Schedulers.async().runRepeating(new QueueServerUpdateRunnable(this.jedisManager), 0L, 100L);
+        Schedulers.async().runRepeating(this.updateRunnable = new QueueServerUpdateRunnable(this.jedisManager), 0L, 100L);
     }
 
     private void setupCommandManager() {
@@ -128,6 +130,10 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
     private void setupQueueHandler() {
         this.queueHandler = new QueueHandler(this.getConfig());
         this.queueHandler.loadQueuesFromConfiguration();
+    }
+
+    private void forceUpdateInstance() {
+        this.updateRunnable.run();
     }
 
     private void setupEventSubscriptions() {

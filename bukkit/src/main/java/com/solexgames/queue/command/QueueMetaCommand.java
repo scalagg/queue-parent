@@ -131,6 +131,7 @@ public class QueueMetaCommand extends BaseCommand {
                     ChatColor.GOLD + ChatColor.BOLD.toString() + serverName + ":",
                     " ",
                     ChatColor.GRAY + "Queueable: " + this.getFancyBoolean(isQueue),
+                    ChatColor.GRAY + "Whitelisted: " + this.getFancyBoolean(serverData.isWhitelisted()),
                     " ",
                     ChatColor.GRAY + "Online Players: " + ChatColor.WHITE + serverData.getOnlinePlayers(),
                     ChatColor.GRAY + "Max Players: " + ChatColor.WHITE + serverData.getMaxPlayers(),
@@ -138,6 +139,14 @@ public class QueueMetaCommand extends BaseCommand {
                     ChatColor.GRAY + "Status: " + (isHanging ? ChatColor.RED + "May be offline, we haven't received an update from the server for more than 15 seconds." : ChatColor.GREEN + "Online and Updating")
             });
         });
+    }
+
+    @Subcommand("update")
+    @Description("Force update this server instance to redis.")
+    public void onUpdate(Player player) {
+        QueueBukkit.getInstance().getUpdateRunnable().run();
+
+        player.sendMessage(QueueBukkitConstants.PREFIX + ChatColor.GREEN + "You've force updated this server instance.");
     }
 
     public String getFancyBoolean(boolean aBoolean) {

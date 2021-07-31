@@ -62,7 +62,7 @@ public class LeaveQueueCommand extends BaseCommand {
         if (fetchedQueue != null) {
             this.leaveQueue(fetchedQueue, player, queuePlayer, false);
         } else {
-            player.sendMessage(ChatColor.RED + "You're not currently queued for a server. 1");
+            player.sendMessage(ChatColor.RED + "You're not currently queued for a server.");
         }
     }
 
