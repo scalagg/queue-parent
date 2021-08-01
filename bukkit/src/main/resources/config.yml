@@ -1,4 +1,4 @@
-server-id: "something-something"
+# Queue servers - should match all other servers
 queues:
   na-practice:
     fancyName: "NA Practice"
@@ -8,12 +8,15 @@ queues:
         fancyName: "Fast Pass"
         permission: "queue.lanes.fastpass"
         priority: 1
+# server-specific data - only needed if you aren't using Scandium
+server-id: "something-something"
 redis:
   host: "127.0.0.1"
   port: 6379
   authentication:
     enabled: false
     password: ""
+# per-player priorities - format them like this: permission:weight
 priorities:
   - permission:weight
   - scandium.staff:100
