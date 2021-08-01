@@ -11,6 +11,6 @@ import org.bukkit.ChatColor;
 @UtilityClass
 public class QueueBukkitConstants {
 
-    public static final String PREFIX = ChatColor.GOLD + ChatColor.BOLD.toString() + "Queue " + ChatColor.GRAY + ChatColor.BOLD.toString() + "»" + " ";
+    public static final String PREFIX = ChatColor.GOLD + ChatColor.BOLD.toString() + "Queue " + ChatColor.GRAY + ChatColor.BOLD + "»" + " ";
 
 }

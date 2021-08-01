@@ -2,7 +2,7 @@ package com.solexgames.queue.command;
 
 import com.solexgames.lib.acf.BaseCommand;
 import com.solexgames.lib.acf.CommandHelp;
-import com.solexgames.lib.acf.InvalidCommandArgument;
+import com.solexgames.lib.acf.ConditionFailedException;
 import com.solexgames.lib.acf.annotation.*;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
 import com.solexgames.queue.QueueBukkit;
@@ -42,7 +42,7 @@ public class QueueMetaCommand extends BaseCommand {
                 .getParentQueueMap().get(parent);
 
         if (parentQueue == null) {
-            throw new InvalidCommandArgument("There is no queue named " + ChatColor.YELLOW + parent + ChatColor.RED + ".");
+            throw new ConditionFailedException("There is no queue named " + ChatColor.YELLOW + parent + ChatColor.RED + ".");
         }
 
         QueueBukkit.getInstance().getJedisManager().publish(

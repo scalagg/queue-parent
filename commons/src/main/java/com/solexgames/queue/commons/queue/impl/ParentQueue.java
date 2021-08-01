@@ -86,12 +86,12 @@ public class ParentQueue extends Queue {
     @Override
     @Deprecated
     public int getPosition(CachedQueuePlayer queuePlayer) {
-        throw new RuntimeException("ParentQueue#getPosition is not supported, please use a child queue.");
+        throw new UnsupportedOperationException("ParentQueue#getPosition is not supported, please use a child queue.");
     }
 
     @Override
     @Deprecated
     public PriorityQueue<UUID> getQueued() {
-        throw new RuntimeException("ParentQueue#getQueued is not supported, please use a child queue.");
+        throw new UnsupportedOperationException("ParentQueue#getQueued is not supported, please use a child queue.");
     }
 }

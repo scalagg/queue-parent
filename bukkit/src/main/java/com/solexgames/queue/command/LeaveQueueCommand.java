@@ -1,7 +1,7 @@
 package com.solexgames.queue.command;
 
 import com.solexgames.lib.acf.BaseCommand;
-import com.solexgames.lib.acf.InvalidCommandArgument;
+import com.solexgames.lib.acf.ConditionFailedException;
 import com.solexgames.lib.acf.annotation.*;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
 import com.solexgames.queue.QueueBukkit;
@@ -32,7 +32,7 @@ public class LeaveQueueCommand extends BaseCommand {
         final CachedQueuePlayer queuePlayer = QueueBukkit.getInstance().getPlayerHandler().getByPlayer(player);
 
         if (queuePlayer == null) {
-            throw new InvalidCommandArgument("Something went wrong.");
+            throw new ConditionFailedException("Something went wrong.");
         }
 
         if (parentQueue != null) {

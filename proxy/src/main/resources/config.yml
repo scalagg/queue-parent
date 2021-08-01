@@ -1,5 +1,6 @@
 queues:
   na-practice:
+
     fancyName: "NA Practice"
     serverName: "na-hub-02"
     children:

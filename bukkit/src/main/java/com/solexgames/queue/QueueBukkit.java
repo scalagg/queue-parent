@@ -1,6 +1,6 @@
 package com.solexgames.queue;
 
-import com.solexgames.lib.acf.InvalidCommandArgument;
+import com.solexgames.lib.acf.ConditionFailedException;
 import com.solexgames.lib.acf.PaperCommandManager;
 import com.solexgames.lib.commons.redis.JedisBuilder;
 import com.solexgames.lib.commons.redis.JedisManager;
@@ -102,7 +102,7 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
             final ParentQueue parentQueue = this.getQueueHandler().getParentQueueMap().get(firstArgument);
 
             if (parentQueue == null) {
-                throw new InvalidCommandArgument("There is no queue named " + ChatColor.YELLOW + firstArgument + ChatColor.RED + ".");
+                throw new ConditionFailedException("There is no queue named " + ChatColor.YELLOW + firstArgument + ChatColor.RED + ".");
             }
 
             return parentQueue;

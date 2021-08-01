@@ -1,6 +1,7 @@
 package com.solexgames.queue.internal;
 
 import com.solexgames.lib.processor.config.Coloured;
+import com.solexgames.lib.processor.config.RequiredField;
 import com.solexgames.lib.processor.config.comment.Comment;
 import lombok.Data;
 import org.bukkit.ChatColor;
@@ -53,5 +54,9 @@ public class QueueBukkitSettings {
     @Coloured
     @Comment("What message should we send to a player when they leave a queue?")
     private final String leaveQueueMessage = ChatColor.RED + "You've left the " + ChatColor.YELLOW + "<queue>" + ChatColor.RED + " queue.";
+
+    @RequiredField
+    @Comment("Should we prioritize players in the queue even though we use lanes?")
+    private final boolean usePriorities = false;
 
 }

@@ -34,7 +34,7 @@ public class ChildQueue extends Queue {
 
     public Optional<UUID> findQueuePlayerInChildQueue(UUID uuid) {
         return this.queued.stream()
-                .filter(queuePlayer -> queuePlayer.toString().equals(uuid.toString()))
+                .filter(queuePlayer -> queuePlayer.equals(uuid))
                 .findFirst();
     }
 
@@ -57,7 +57,7 @@ public class ChildQueue extends Queue {
         for (int i = 0; i <= this.queued.size(); i++) {
             final UUID player = players.poll();
 
-            if (player != null && player.toString().equals(queuePlayer.getUniqueId().toString())) {
+            if (player != null && player.equals(queuePlayer.getUniqueId())) {
                 return i + 1;
             }
         }

@@ -1,7 +1,7 @@
 package com.solexgames.queue.command;
 
 import com.solexgames.lib.acf.BaseCommand;
-import com.solexgames.lib.acf.InvalidCommandArgument;
+import com.solexgames.lib.acf.ConditionFailedException;
 import com.solexgames.lib.acf.annotation.CommandAlias;
 import com.solexgames.lib.acf.annotation.Default;
 import com.solexgames.lib.acf.annotation.Dependency;
@@ -35,7 +35,7 @@ public class JoinQueueCommand extends BaseCommand {
         final CachedQueuePlayer queuePlayer = QueueBukkit.getInstance().getPlayerHandler().getByPlayer(player);
 
         if (queuePlayer == null) {
-            throw new InvalidCommandArgument("Something went wrong.");
+            throw new ConditionFailedException("Something went wrong.");
         }
 
         final List<ParentQueue> queuedServers = QueueBukkit.getInstance().getQueueHandler()
@@ -44,20 +44,20 @@ public class JoinQueueCommand extends BaseCommand {
         final boolean alreadyIn = queuedServers.contains(parentQueue);
 
         if (alreadyIn) {
-            throw new InvalidCommandArgument("You're already in the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " queue.");
+            throw new ConditionFailedException("You're already in the " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " queue.");
         }
 
         final int queueAmount = queuedServers.size() + 1;
 
         if (QueueBukkit.getInstance().getSettings().isAllowMultipleQueues()) {
             if (queueAmount > 2) {
-                throw new InvalidCommandArgument("You cannot join more than " + ChatColor.YELLOW + "2" + ChatColor.RED + " queues at a time.");
+                throw new ConditionFailedException("You cannot join more than " + ChatColor.YELLOW + "2" + ChatColor.RED + " queues at a time.");
             }
         } else {
             if (queueAmount > 1) {
                 final String queueName = queuedServers.get(0).getFancyName();
 
-                throw new InvalidCommandArgument("You cannot join " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " as you're queued for " + ChatColor.YELLOW + queueName + ChatColor.RED + ".");
+                throw new ConditionFailedException("You cannot join " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.RED + " as you're queued for " + ChatColor.YELLOW + queueName + ChatColor.RED + ".");
             }
         }
 
