@@ -12,7 +12,10 @@ import java.util.Map;
 public interface IQueueHandler {
 
     Map<String, ParentQueue> getParentQueueMap();
+    Map<String, Integer> getPermissionPriorityMap();
 
     void loadQueuesFromConfiguration();
+
+    boolean shouldPrioritizePlayers();
 
 }

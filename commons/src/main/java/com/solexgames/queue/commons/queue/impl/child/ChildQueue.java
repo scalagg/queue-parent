@@ -41,7 +41,7 @@ public class ChildQueue extends Queue {
     @Override
     public boolean isQueued(CachedQueuePlayer queuePlayer) {
         return this.queued.stream()
-                .filter(queuePlayer1 -> queuePlayer.getUniqueId().toString().equals(queuePlayer1.toString()))
+                .filter(queuePlayer1 -> queuePlayer.getUniqueId().equals(queuePlayer1))
                 .findFirst().orElse(null) != null;
     }
 

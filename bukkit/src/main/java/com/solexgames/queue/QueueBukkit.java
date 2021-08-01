@@ -10,6 +10,7 @@ import com.solexgames.queue.cache.NamingSchemeCache;
 import com.solexgames.queue.command.JoinQueueCommand;
 import com.solexgames.queue.command.LeaveQueueCommand;
 import com.solexgames.queue.command.QueueMetaCommand;
+import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.platform.QueuePlatform;
 import com.solexgames.queue.commons.platform.QueuePlatforms;
@@ -30,6 +31,7 @@ import me.lucko.helper.plugin.ExtendedJavaPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.List;
@@ -154,6 +156,14 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
             });
         });
 
+        Events.subscribe(PlayerJoinEvent.class).handler(event -> {
+            final CachedQueuePlayer queuePlayer = this.playerHandler.getByPlayer(event.getPlayer());
+
+            if (queuePlayer != null) {
+                this.queueHandler.handlePostLogin(queuePlayer);
+            }
+        });
+
         Events.subscribe(PlayerQuitEvent.class).handler(event -> {
             final CachedQueuePlayer queuePlayer = this.playerHandler.getByPlayer(event.getPlayer());
 
@@ -182,5 +192,12 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
                 .build();
 
         this.playerHandler = new PlayerHandler(this.jedisManager);
+    }
+
+    @Override
+    public void disable() {
+        this.jedisManager.runCommand(jedis -> {
+            jedis.hdel(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE, this.settingsProvider.getServerName());
+        });
     }
 }

@@ -14,3 +14,6 @@ redis:
   authentication:
     enabled: false
     password: ""
+priorities:
+  - permission:weight
+  - scandium.staff:100

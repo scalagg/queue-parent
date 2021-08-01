@@ -57,6 +57,6 @@ public class QueueBukkitSettings {
 
     @RequiredField
     @Comment("Should we prioritize players in the queue even though we use lanes?")
-    private final boolean usePriorities = false;
+    private final boolean shouldPrioritizePlayers = false;
 
 }

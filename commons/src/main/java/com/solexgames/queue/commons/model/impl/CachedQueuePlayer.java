@@ -1,10 +1,12 @@
 package com.solexgames.queue.commons.model.impl;
 
 import com.solexgames.queue.commons.model.QueuePlayer;
+import com.solexgames.queue.commons.platform.QueuePlatforms;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-import java.util.*;
+import java.util.UUID;
 
 /**
  * @author GrowlyX
@@ -20,8 +22,15 @@ public class CachedQueuePlayer extends QueuePlayer implements Comparable<CachedQ
     private final String name;
     private final UUID uniqueId;
 
+    @Setter
+    private int priority;
+
     @Override
     public int compareTo(CachedQueuePlayer cachedQueuePlayer) {
-        return cachedQueuePlayer.getUniqueId().compareTo(this.getUniqueId());
+        final boolean priorityBased = QueuePlatforms.get().getQueueHandler().shouldPrioritizePlayers();
+
+        return priorityBased ?
+                cachedQueuePlayer.getUniqueId().compareTo(this.getUniqueId()) :
+                this.priority < cachedQueuePlayer.getPriority() ? -1 : 1;
     }
 }

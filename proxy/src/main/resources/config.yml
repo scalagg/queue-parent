@@ -1,6 +1,5 @@
 queues:
   na-practice:
-
     fancyName: "NA Practice"
     serverName: "na-hub-02"
     children:
@@ -8,3 +7,4 @@ queues:
         fancyName: "Fast Pass"
         permission: "queue.lanes.fastpass"
         priority: 1
+prioritize-players-by-permission: false

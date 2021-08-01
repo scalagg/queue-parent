@@ -27,6 +27,8 @@ public class QueueHandler implements IQueueHandler {
 
     private final Configuration configuration;
 
+    private boolean prioritizePlayers;
+
     public void loadQueuesFromConfiguration() {
         final Configuration section = this.configuration.getSection("queues");
 
@@ -47,6 +49,8 @@ public class QueueHandler implements IQueueHandler {
 
             this.parentQueueMap.put(key, parentQueue);
         });
+
+        this.prioritizePlayers = this.configuration.getBoolean("prioritize-players-by-permission");
     }
 
     /**
@@ -70,5 +74,15 @@ public class QueueHandler implements IQueueHandler {
 
             return serverDataAtomicReference.get();
         });
+    }
+
+    @Override
+    public boolean shouldPrioritizePlayers() {
+        return this.prioritizePlayers;
+    }
+
+    @Override
+    public Map<String, Integer> getPermissionPriorityMap() {
+        throw new UnsupportedOperationException("IQueueHandler#getPermissionPriorityMap is not supported on BungeeCord");
     }
 }

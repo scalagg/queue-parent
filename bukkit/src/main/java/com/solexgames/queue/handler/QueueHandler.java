@@ -8,6 +8,7 @@ import com.solexgames.queue.commons.model.server.ServerData;
 import com.solexgames.queue.commons.platform.handler.IQueueHandler;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
 import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
+import com.solexgames.queue.util.MapUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.configuration.Configuration;
@@ -28,8 +29,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class QueueHandler implements IQueueHandler {
 
     private final Map<String, ParentQueue> parentQueueMap = new HashMap<>();
-
     private final Configuration configuration;
+
+    private Map<String, Integer> permissionPriorityMap = new HashMap<>();
 
     public void loadQueuesFromConfiguration() {
         final ConfigurationSection section = this.configuration.getConfigurationSection("queues");
@@ -53,6 +55,22 @@ public class QueueHandler implements IQueueHandler {
 
             QueueLogger.log("Loaded parent queue " + key + " with " + children.size() + " child queues.");
         });
+
+        final Map<String, Integer> unsortedDeserializedMap = new HashMap<>();
+
+        this.configuration.getStringList("priorities").forEach(s -> {
+            final String[] splitString = s.split(":");
+
+            try {
+                final Integer integer = Integer.parseInt(splitString[1]);
+                final String permission = splitString[0];
+
+                unsortedDeserializedMap.put(permission, integer);
+            } catch (Exception ignored) {
+            }
+        });
+
+        this.permissionPriorityMap = MapUtil.sortByValue(unsortedDeserializedMap);
 
         QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
             final Map<String, String> jedisValues = jedis.hgetAll(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE);
@@ -181,5 +199,27 @@ public class QueueHandler implements IQueueHandler {
 
         // this should never be null, if it is, something is very very very wrong
         return parentQueue.getChildren().get(0);
+    }
+
+    /**
+     * Calculates the best possible priority for a player
+     * based on what permissions they have.
+     *
+     * @param queuePlayer The queue player to calculate priorities for
+     * @param player The bukkit player entity to get permissions from
+     */
+    public void handlePostLogin(CachedQueuePlayer queuePlayer, Player player) {
+        if (this.shouldPrioritizePlayers()) {
+            for (final Map.Entry<String, Integer> entry : this.permissionPriorityMap.entrySet()) {
+                if (entry.getKey() != null && player.hasPermission(entry.getKey())) {
+                    queuePlayer.setPriority(entry.getValue());
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean shouldPrioritizePlayers() {
+        return QueueBukkit.getInstance().getSettings().isShouldPrioritizePlayers();
     }
 }
