@@ -93,7 +93,7 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
         }, 0L, 5L, TimeUnit.SECONDS);
 
         ProxyServer.getInstance().getScheduler().schedule(
-                this, new QueueSendRunnable(this.queueHandler), 0L, 10L, TimeUnit.MILLISECONDS
+                this, new QueueSendRunnable(this.queueHandler), 0L, 20L, TimeUnit.MILLISECONDS
         );
     }
 }

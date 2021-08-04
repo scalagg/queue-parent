@@ -160,7 +160,7 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
             final CachedQueuePlayer queuePlayer = this.playerHandler.getByPlayer(event.getPlayer());
 
             if (queuePlayer != null) {
-                this.queueHandler.handlePostLogin(queuePlayer);
+                this.queueHandler.handlePostLogin(queuePlayer, event.getPlayer());
             }
         });
 

@@ -39,11 +39,7 @@ public class XenonJedisAdapter implements JedisHandler {
                 QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
                     jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), QueueGlobalConstants.GSON.toJson(parentQueue.getSettings()));
                 });
-
-                QueueLogger.log("Found player and sent remove queue packet");
             });
         });
-
-        QueueLogger.log("Received global disconnect packet");
     }
 }

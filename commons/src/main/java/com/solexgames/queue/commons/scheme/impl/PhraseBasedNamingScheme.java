@@ -4,6 +4,7 @@ import com.solexgames.queue.commons.scheme.NamingScheme;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author GrowlyX
@@ -23,6 +24,6 @@ public class PhraseBasedNamingScheme implements NamingScheme {
 
     @Override
     public String generate() {
-        return "";
+        return this.phrases.get(ThreadLocalRandom.current().nextInt(this.phrases.size()));
     }
 }

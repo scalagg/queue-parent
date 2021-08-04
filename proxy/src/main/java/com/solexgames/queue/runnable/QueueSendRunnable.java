@@ -53,7 +53,7 @@ public class QueueSendRunnable implements Runnable {
                     final List<ChildQueue> sortedList = parentQueue.getSortedChildren();
 
                     for (final ChildQueue childQueue : sortedList) {
-                        if (!childQueue.getQueued().isEmpty() && !parentQueue.getSetting("paused:" + childQueue.getName())) {
+                        if (!childQueue.getQueued().isEmpty() && parentQueue.getSettings().get("paused:" + childQueue.getName()) == null) {
                             final UUID uuid = childQueue.getQueued().poll();
 
                             if (uuid != null) {
