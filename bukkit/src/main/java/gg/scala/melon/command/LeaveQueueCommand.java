@@ -1,10 +1,10 @@
 package gg.scala.melon.command;
 
-import com.solexgames.lib.acf.BaseCommand;
-import com.solexgames.lib.acf.ConditionFailedException;
-import com.solexgames.lib.acf.annotation.*;
+import net.evilblock.cubed.acf.BaseCommand;
+import net.evilblock.cubed.acf.ConditionFailedException;
+import net.evilblock.cubed.acf.annotation.*;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
-import gg.scala.melon.QueueBukkit;
+import gg.scala.melon.MelonSpigotPlugin;
 import gg.scala.melon.commons.model.impl.CachedQueuePlayer;
 import gg.scala.melon.commons.queue.impl.ParentQueue;
 import gg.scala.melon.commons.queue.impl.child.ChildQueue;
@@ -30,7 +30,7 @@ public class LeaveQueueCommand extends BaseCommand {
     @Default
     @Syntax("[optional: <queue id>]")
     public void onDefault(Player player, @Optional ParentQueue parentQueue) {
-        final CachedQueuePlayer queuePlayer = QueueBukkit.getInstance().getPlayerHandler().getByPlayer(player);
+        final CachedQueuePlayer queuePlayer = MelonSpigotPlugin.getInstance().getPlayerHandler().getByPlayer(player);
 
         if (queuePlayer == null) {
             throw new ConditionFailedException("Something went wrong.");
@@ -41,7 +41,7 @@ public class LeaveQueueCommand extends BaseCommand {
             return;
         }
 
-        final List<ParentQueue> queuedServers = QueueBukkit.getInstance().getQueueHandler()
+        final List<ParentQueue> queuedServers = MelonSpigotPlugin.getInstance().getQueueHandler()
                 .fetchPlayerQueuedIn(queuePlayer);
 
         final int queuesQueuedIn = queuedServers.size();
@@ -72,7 +72,7 @@ public class LeaveQueueCommand extends BaseCommand {
 
         if (childQueue != null) {
             CompletableFuture.runAsync(() -> {
-                QueueBukkit.getInstance().getJedisManager().publish(
+                MelonSpigotPlugin.getInstance().getJedisManager().publish(
                         new JsonAppender("QUEUE_REMOVE_PLAYER")
                                 .put("PARENT", parentQueue.getName())
                                 .put("CHILD", childQueue.getName())

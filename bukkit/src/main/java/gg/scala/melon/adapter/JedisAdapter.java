@@ -3,7 +3,7 @@ package gg.scala.melon.adapter;
 import com.solexgames.lib.commons.redis.annotation.Subscription;
 import com.solexgames.lib.commons.redis.handler.JedisHandler;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
-import gg.scala.melon.QueueBukkit;
+import gg.scala.melon.MelonSpigotPlugin;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.model.impl.CachedQueuePlayer;
 import gg.scala.melon.commons.model.server.ServerData;
@@ -28,7 +28,7 @@ public class JedisAdapter implements JedisHandler {
     @Subscription(action = "QUEUE_DATA_UPDATE")
     public void onQueueDataUpdate(JsonAppender jsonAppender) {
         final String parentQueueName = jsonAppender.getParam("PARENT");
-        final ParentQueue parentQueue = QueueBukkit.getInstance().getQueueHandler()
+        final ParentQueue parentQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
 
         if (parentQueue != null) {
@@ -43,7 +43,7 @@ public class JedisAdapter implements JedisHandler {
 
         final UUID uuid = UUID.fromString(jsonAppender.getParam("PLAYER"));
 
-        final ParentQueue parentQueue = QueueBukkit.getInstance().getQueueHandler()
+        final ParentQueue parentQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
 
         if (parentQueue != null) {
@@ -61,7 +61,7 @@ public class JedisAdapter implements JedisHandler {
         final String childQueueName = jsonAppender.getParam("CHILD");
         final UUID uuid = UUID.fromString(jsonAppender.getParam("PLAYER"));
 
-        final ParentQueue parentQueue = QueueBukkit.getInstance().getQueueHandler()
+        final ParentQueue parentQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
 
         if (parentQueue != null) {
@@ -77,7 +77,7 @@ public class JedisAdapter implements JedisHandler {
     public void onQueueFlush(JsonAppender jsonAppender) {
         final String parentQueueName = jsonAppender.getParam("PARENT");
 
-        final ParentQueue parentQueue = QueueBukkit.getInstance().getQueueHandler()
+        final ParentQueue parentQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
 
         if (parentQueue != null) {
@@ -102,10 +102,10 @@ public class JedisAdapter implements JedisHandler {
     @Subscription(action = "QUEUE_SEND_PLAYER")
     public void onQueueSend(JsonAppender jsonAppender) {
         final UUID uuid = UUID.fromString(jsonAppender.getParam("PLAYER_ID"));
-        final CachedQueuePlayer queuePlayer = QueueBukkit.getInstance().getPlayerHandler().getByUuid(uuid);
+        final CachedQueuePlayer queuePlayer = MelonSpigotPlugin.getInstance().getPlayerHandler().getByUuid(uuid);
 
         if (queuePlayer != null) {
-            final ParentQueue parentQueue = QueueBukkit.getInstance().getQueueHandler()
+            final ParentQueue parentQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
                     .getParentQueueMap().get(jsonAppender.getParam("PARENT"));
 
             if (parentQueue != null) {
@@ -119,7 +119,7 @@ public class JedisAdapter implements JedisHandler {
                         player.sendMessage(ChatColor.GREEN + "You're now being sent to " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.GREEN + ".");
 
                         CompletableFuture.runAsync(() -> {
-                            QueueBukkit.getInstance().getBungeeJedisManager().publish(
+                            MelonSpigotPlugin.getInstance().getBungeeJedisManager().publish(
                                     new JsonAppender("SEND_SERVER")
                                             .put("PLAYER", queuePlayer.getName())
                                             .put("SERVER", parentQueue.getTargetServer())
@@ -139,7 +139,7 @@ public class JedisAdapter implements JedisHandler {
     @Subscription(action = "QUEUE_BROADCAST_ALL")
     public void onQueueBroadcast(JsonAppender jsonAppender) {
         QueuePlatforms.get().getQueueHandler().getParentQueueMap().values().forEach(parentQueue -> {
-            final CompletableFuture<ServerData> completableFuture = QueueBukkit.getInstance().getQueueHandler()
+            final CompletableFuture<ServerData> completableFuture = MelonSpigotPlugin.getInstance().getQueueHandler()
                     .fetchServerData(parentQueue.getTargetServer());
 
             completableFuture.whenComplete((serverData, throwable) -> {
@@ -153,22 +153,22 @@ public class JedisAdapter implements JedisHandler {
                             final Player bukkitPlayer = Bukkit.getPlayer(uuid);
 
                             if (bukkitPlayer != null) {
-                                final CachedQueuePlayer queuePlayer = QueueBukkit.getInstance().getPlayerHandler().getByUuid(uuid);
+                                final CachedQueuePlayer queuePlayer = MelonSpigotPlugin.getInstance().getPlayerHandler().getByUuid(uuid);
 
                                 if (serverData == null || serverData.getLastUpdate() + QueueGlobalConstants.FIFTEEN_SECONDS < System.currentTimeMillis()) {
-                                    QueueBukkit.getInstance().getFormatterHandler()
+                                    MelonSpigotPlugin.getInstance().getFormatterHandler()
                                             .sendCannotJoinMessageToPlayer(bukkitPlayer, queuePlayer, childQueue, "offline");
                                     return;
                                 }
 
                                 if (serverData.isWhitelisted()) {
-                                    QueueBukkit.getInstance().getFormatterHandler()
+                                    MelonSpigotPlugin.getInstance().getFormatterHandler()
                                             .sendCannotJoinMessageToPlayer(bukkitPlayer, queuePlayer, childQueue, "whitelisted");
                                 } else if (serverData.getOnlinePlayers() >= serverData.getMaxPlayers()) {
-                                    QueueBukkit.getInstance().getFormatterHandler()
+                                    MelonSpigotPlugin.getInstance().getFormatterHandler()
                                             .sendCannotJoinMessageToPlayer(bukkitPlayer, queuePlayer, childQueue, "full");
                                 } else {
-                                    QueueBukkit.getInstance().getFormatterHandler()
+                                    MelonSpigotPlugin.getInstance().getFormatterHandler()
                                             .sendCanJoinMessageToPlayer(bukkitPlayer, queuePlayer, childQueue);
                                 }
                             }

@@ -1,12 +1,12 @@
 package gg.scala.melon.command;
 
-import com.solexgames.lib.acf.BaseCommand;
-import com.solexgames.lib.acf.CommandHelp;
-import com.solexgames.lib.acf.ConditionFailedException;
-import com.solexgames.lib.acf.annotation.*;
+import net.evilblock.cubed.acf.BaseCommand;
+import net.evilblock.cubed.acf.CommandHelp;
+import net.evilblock.cubed.acf.ConditionFailedException;
+import net.evilblock.cubed.acf.annotation.*;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
-import gg.scala.melon.QueueBukkit;
-import gg.scala.melon.QueueBukkitConstants;
+import gg.scala.melon.MelonSpigotPlugin;
+import gg.scala.melon.MelonSpigotConstants;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.model.server.ServerData;
 import gg.scala.melon.commons.platform.QueuePlatforms;
@@ -38,14 +38,14 @@ public class QueueMetaCommand extends BaseCommand {
     @Syntax("<queue id> <key> <value>")
     @Description("Update a meta data value.")
     public void onDefault(Player player, String parent /* not using object cuz acf weird */, String key, boolean value) {
-        final ParentQueue parentQueue = QueueBukkit.getInstance().getQueueHandler()
+        final ParentQueue parentQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parent);
 
         if (parentQueue == null) {
             throw new ConditionFailedException("There is no queue named " + ChatColor.YELLOW + parent + ChatColor.RED + ".");
         }
 
-        QueueBukkit.getInstance().getJedisManager().publish(
+        MelonSpigotPlugin.getInstance().getJedisManager().publish(
                 new JsonAppender("QUEUE_DATA_UPDATE")
                         .put("PARENT", parentQueue.getName())
                         .put("KEY", key)
@@ -53,7 +53,7 @@ public class QueueMetaCommand extends BaseCommand {
                         .getAsJson()
         );
 
-        player.sendMessage(QueueBukkitConstants.PREFIX + ChatColor.YELLOW + "Updated " + ChatColor.GOLD + key + ChatColor.YELLOW + " to " + ChatColor.AQUA + value + ChatColor.YELLOW + ".");
+        player.sendMessage(MelonSpigotConstants.PREFIX + ChatColor.YELLOW + "Updated " + ChatColor.GOLD + key + ChatColor.YELLOW + " to " + ChatColor.AQUA + value + ChatColor.YELLOW + ".");
     }
 
     @Subcommand("flush")
@@ -61,13 +61,13 @@ public class QueueMetaCommand extends BaseCommand {
     @CommandCompletion("@parents")
     @Description("Kick all players (in all lanes) out of a parent queue.")
     public void onFlush(Player player, ParentQueue parentQueue) {
-        QueueBukkit.getInstance().getJedisManager().publish(
+        MelonSpigotPlugin.getInstance().getJedisManager().publish(
                 new JsonAppender("QUEUE_FLUSH")
                         .put("PARENT", parentQueue.getName())
                         .getAsJson()
         );
 
-        player.sendMessage(QueueBukkitConstants.PREFIX + ChatColor.YELLOW + "Flushed parent queue " + ChatColor.GOLD + parentQueue.getFancyName() + ChatColor.YELLOW + ".");
+        player.sendMessage(MelonSpigotConstants.PREFIX + ChatColor.YELLOW + "Flushed parent queue " + ChatColor.GOLD + parentQueue.getFancyName() + ChatColor.YELLOW + ".");
     }
 
     @Subcommand("list")
@@ -89,7 +89,7 @@ public class QueueMetaCommand extends BaseCommand {
     public void onQueueList(Player player) {
         player.sendMessage(ChatColor.GREEN + "Fetching server data from redis...");
 
-        final CompletableFuture<Map<String, ServerData>> completableFuture = QueueBukkit
+        final CompletableFuture<Map<String, ServerData>> completableFuture = MelonSpigotPlugin
                 .getInstance().getQueueHandler().fetchAllServerData();
 
         completableFuture.whenComplete((stringServerDataMap, throwable) -> {
@@ -111,7 +111,7 @@ public class QueueMetaCommand extends BaseCommand {
     public void onServerId(Player player, String serverName) {
         player.sendMessage(ChatColor.GREEN + "Fetching server data from redis...");
 
-        final CompletableFuture<ServerData> completableFuture = QueueBukkit.getInstance()
+        final CompletableFuture<ServerData> completableFuture = MelonSpigotPlugin.getInstance()
                 .getQueueHandler().fetchServerData(serverName);
 
         completableFuture.whenComplete((serverData, throwable) -> {
@@ -144,9 +144,9 @@ public class QueueMetaCommand extends BaseCommand {
     @Subcommand("update")
     @Description("Force update this server instance to redis.")
     public void onUpdate(Player player) {
-        QueueBukkit.getInstance().getUpdateRunnable().run();
+        MelonSpigotPlugin.getInstance().getUpdateRunnable().run();
 
-        player.sendMessage(QueueBukkitConstants.PREFIX + ChatColor.GREEN + "You've force updated this server instance.");
+        player.sendMessage(MelonSpigotConstants.PREFIX + ChatColor.GREEN + "You've force updated this server instance.");
     }
 
     public String getFancyBoolean(boolean aBoolean) {

@@ -10,7 +10,7 @@ import org.bukkit.ChatColor;
  */
 
 @UtilityClass
-public class QueueBukkitConstants {
+public class MelonSpigotConstants {
 
     public static final String PREFIX = CC.B_PRI + "Queue " + ChatColor.GRAY + ChatColor.BOLD + "»" + " ";
 

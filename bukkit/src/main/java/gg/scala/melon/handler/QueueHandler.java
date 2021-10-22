@@ -1,6 +1,6 @@
 package gg.scala.melon.handler;
 
-import gg.scala.melon.QueueBukkit;
+import gg.scala.melon.MelonSpigotPlugin;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.logger.QueueLogger;
 import gg.scala.melon.commons.model.impl.CachedQueuePlayer;
@@ -72,7 +72,7 @@ public class QueueHandler implements IQueueHandler {
 
         this.permissionPriorityMap = MapUtil.sortByValue(unsortedDeserializedMap);
 
-        QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
+        MelonSpigotPlugin.getInstance().getJedisManager().runCommand(jedis -> {
             final Map<String, String> jedisValues = jedis.hgetAll(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE);
 
             if (jedisValues != null) {
@@ -96,7 +96,7 @@ public class QueueHandler implements IQueueHandler {
             }
         });
 
-        QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
+        MelonSpigotPlugin.getInstance().getJedisManager().runCommand(jedis -> {
             final Map<String, String> jedisValues = jedis.hgetAll(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE);
 
             if (jedisValues != null) {
@@ -124,7 +124,7 @@ public class QueueHandler implements IQueueHandler {
         return CompletableFuture.supplyAsync(() -> {
             final AtomicReference<ServerData> serverDataAtomicReference = new AtomicReference<>();
 
-            QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
+            MelonSpigotPlugin.getInstance().getJedisManager().runCommand(jedis -> {
                 final String jedisValue = jedis.hget(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE, serverName);
 
                 serverDataAtomicReference.set(QueueGlobalConstants.GSON.fromJson(jedisValue, ServerData.class));
@@ -144,7 +144,7 @@ public class QueueHandler implements IQueueHandler {
         return CompletableFuture.supplyAsync(() -> {
             final AtomicReference<Map<String, ServerData>> serverDataAtomicReference = new AtomicReference<>();
 
-            QueueBukkit.getInstance().getJedisManager().runCommand(jedis -> {
+            MelonSpigotPlugin.getInstance().getJedisManager().runCommand(jedis -> {
                 final Map<String, String> jedisValue = jedis.hgetAll(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE);
                 final Map<String, ServerData> deserialized = new HashMap<>();
 
@@ -220,6 +220,6 @@ public class QueueHandler implements IQueueHandler {
 
     @Override
     public boolean shouldPrioritizePlayers() {
-        return QueueBukkit.getInstance().getSettings().isShouldPrioritizePlayers();
+        return MelonSpigotPlugin.getInstance().getSettings().isShouldPrioritizePlayers();
     }
 }

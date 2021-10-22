@@ -1,10 +1,9 @@
 package gg.scala.melon.command;
 
-import com.solexgames.lib.acf.BaseCommand;
-import com.solexgames.lib.acf.ConditionFailedException;
-import com.solexgames.lib.acf.annotation.*;
-import com.solexgames.lib.commons.redis.json.JsonAppender;
-import gg.scala.melon.QueueBukkit;
+import net.evilblock.cubed.acf.BaseCommand;
+import net.evilblock.cubed.acf.ConditionFailedException;
+import net.evilblock.cubed.acf.annotation.*;
+import gg.scala.melon.MelonSpigotPlugin;
 import gg.scala.melon.commons.model.impl.CachedQueuePlayer;
 import gg.scala.melon.commons.queue.impl.ParentQueue;
 import gg.scala.melon.commons.queue.impl.child.ChildQueue;
@@ -30,7 +29,8 @@ public class JoinQueueCommand extends BaseCommand {
     @Default
     @Syntax("<queue id>")
     public void onDefault(Player player, ParentQueue parentQueue) {
-        final CachedQueuePlayer queuePlayer = QueueBukkit.getInstance().getPlayerHandler().getByPlayer(player);
+        final CachedQueuePlayer queuePlayer = MelonSpigotPlugin.getInstance()
+                .getPlayerHandler().getByPlayer(player);
 
         if (queuePlayer == null) {
             throw new ConditionFailedException("Something went wrong.");
@@ -40,7 +40,7 @@ public class JoinQueueCommand extends BaseCommand {
             throw new ConditionFailedException("Please wait a moment before joining another queue");
         }
 
-        final List<ParentQueue> queuedServers = QueueBukkit.getInstance().getQueueHandler()
+        final List<ParentQueue> queuedServers = MelonSpigotPlugin.getInstance().getQueueHandler()
                 .fetchPlayerQueuedIn(queuePlayer);
 
         final boolean alreadyIn = queuedServers.contains(parentQueue);
@@ -51,7 +51,7 @@ public class JoinQueueCommand extends BaseCommand {
 
         final int queueAmount = queuedServers.size() + 1;
 
-        if (QueueBukkit.getInstance().getSettings().isAllowMultipleQueues()) {
+        if (MelonSpigotPlugin.getInstance().getSettings().isAllowMultipleQueues()) {
             if (queueAmount > 2) {
                 throw new ConditionFailedException("You cannot join more than " + ChatColor.YELLOW + "2" + ChatColor.RED + " queues at a time.");
             }
@@ -64,10 +64,10 @@ public class JoinQueueCommand extends BaseCommand {
         }
 
         CompletableFuture.supplyAsync(() -> {
-            final ChildQueue bestChildQueue = QueueBukkit.getInstance().getQueueHandler()
+            final ChildQueue bestChildQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
                     .fetchBestChildQueue(parentQueue, player);
 
-            QueueBukkit.getInstance().getJedisManager().publish(
+            MelonSpigotPlugin.getInstance().getJedisManager().publish(
                     new JsonAppender("QUEUE_ADD_PLAYER")
                             .put("PARENT", parentQueue.getName())
                             .put("CHILD", bestChildQueue.getName())

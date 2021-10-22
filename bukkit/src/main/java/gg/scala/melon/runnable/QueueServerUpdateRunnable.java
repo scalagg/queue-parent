@@ -1,7 +1,7 @@
 package gg.scala.melon.runnable;
 
-import com.solexgames.lib.commons.redis.JedisManager;
-import gg.scala.melon.QueueBukkit;
+import gg.scala.banana.Banana;
+import gg.scala.lemon.Lemon;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.model.server.ServerData;
 import lombok.RequiredArgsConstructor;
@@ -22,27 +22,29 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class QueueServerUpdateRunnable implements Runnable {
 
-    private final JedisManager jedisManager;
+    private final Banana jedisManager;
 
     private final ServerData serverData = new ServerData();
 
     @Override
     public void run() {
-        this.jedisManager.runCommand(jedis -> {
+        this.jedisManager.useResource(jedis -> {
             final List<String> whitelistedPlayers = Bukkit.getWhitelistedPlayers().stream()
                     .map(OfflinePlayer::getName).collect(Collectors.toList());
 
             this.serverData.setMaxPlayers(Bukkit.getMaxPlayers());
             this.serverData.setOnlinePlayers(Bukkit.getOnlinePlayers().size());
-            this.serverData.setWhitelisted(QueueBukkit.getInstance().getSettingsProvider().canJoin() && this.isWhitelistEnabled());
+            this.serverData.setWhitelisted(Lemon.getCanJoin() && this.isWhitelistEnabled());
             this.serverData.setWhitelistedPlayers(whitelistedPlayers);
             this.serverData.setLastUpdate(System.currentTimeMillis());
 
             jedis.hset(
                     QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE,
-                    QueueBukkit.getInstance().getSettingsProvider().getServerName(),
+                    Lemon.getInstance().getSettings().getId(),
                     QueueGlobalConstants.GSON.toJson(this.serverData)
             );
+
+            return null;
         });
     }
 

@@ -1,8 +1,8 @@
 package gg.scala.melon.command;
 
-import com.solexgames.lib.acf.BaseCommand;
-import com.solexgames.lib.acf.CommandHelp;
-import com.solexgames.lib.acf.annotation.*;
+import net.evilblock.cubed.acf.BaseCommand;
+import net.evilblock.cubed.acf.CommandHelp;
+import net.evilblock.cubed.acf.annotation.*;
 
 /**
  * @author GrowlyX
