@@ -66,6 +66,10 @@
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>jitpack</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -78,7 +82,7 @@
 
         <!-- internal !-->
         <dependency>
-            <groupId>com.solexgames</groupId>
+            <groupId>gg.scala</groupId>
             <artifactId>commons</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>

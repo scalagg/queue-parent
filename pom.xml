@@ -14,7 +14,6 @@
         <module>bukkit</module>
         <module>proxy</module>
         <module>commons</module>
-        <module>api</module>
     </modules>
 
     <build>
