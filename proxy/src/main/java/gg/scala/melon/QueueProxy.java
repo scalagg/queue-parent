@@ -1,5 +1,7 @@
 package gg.scala.melon;
 
+import gg.scala.banana.Banana;
+import gg.scala.banana.message.Message;
 import gg.scala.melon.adapter.JedisAdapter;
 import gg.scala.melon.adapter.XenonJedisAdapter;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
@@ -8,10 +10,6 @@ import gg.scala.melon.commons.platform.QueuePlatform;
 import gg.scala.melon.commons.platform.QueuePlatforms;
 import gg.scala.melon.handler.QueueHandler;
 import gg.scala.melon.runnable.QueueSendRunnable;
-import com.solexgames.xenon.CorePlugin;
-import com.solexgames.xenon.redis.JedisBuilder;
-import com.solexgames.xenon.redis.JedisManager;
-import com.solexgames.xenon.redis.json.JsonAppender;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.md_5.bungee.api.ProxyServer;
@@ -33,8 +31,8 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
 
     private QueueHandler queueHandler;
 
-    private JedisManager jedisManager;
-    private JedisManager xenonJedisManager;
+    private Banana jedisManager;
+    private Banana xenonJedisManager;
 
     private boolean shouldBroadcast = true;
 
@@ -49,25 +47,26 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
         this.queueHandler = new QueueHandler(configuration);
         this.queueHandler.loadQueuesFromConfiguration();
 
-        this.jedisManager = new JedisBuilder()
-                .withChannel("queue_global")
-                .withHandler(new JedisAdapter())
-                .withSettings(CorePlugin.getInstance().getJedisManager().getSettings())
-                .build();
-
-        this.xenonJedisManager = new JedisBuilder()
-                .withChannel("scandium:bungee")
-                .withHandler(new XenonJedisAdapter())
-                .withSettings(CorePlugin.getInstance().getJedisManager().getSettings())
-                .build();
+//        this.jedisManager = new JedisBuilder()
+//                .withChannel("queue_global")
+//                .withHandler(new JedisAdapter())
+//                .withSettings(CorePlugin.getInstance().getJedisManager().getSettings())
+//                .build();
+//
+//        this.xenonJedisManager = new JedisBuilder()
+//                .withChannel("scandium:bungee")
+//                .withHandler(new XenonJedisAdapter())
+//                .withSettings(CorePlugin.getInstance().getJedisManager().getSettings())
+//                .build();
 
         QueuePlatforms.setPlatform(this);
 
         this.setupTaskSubscriptions();
 
         this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
-            QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
+            this.jedisManager.useResource(jedis -> {
                 jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), QueueGlobalConstants.GSON.toJson(parentQueue.getSettings()));
+                return null;
             });
 
             QueueLogger.log("Setup queue by the name " + parentQueue.getName() + ".");
@@ -80,10 +79,7 @@ public final class QueueProxy extends Plugin implements QueuePlatform {
         final ScheduledExecutorService broadcast = Executors.newScheduledThreadPool(1);
         broadcast.scheduleAtFixedRate(() -> {
             if (this.shouldBroadcast) {
-                this.jedisManager.publish(
-                        new JsonAppender("QUEUE_BROADCAST_ALL")
-                                .getAsJson()
-                );
+                new Message("QUEUE_BROADCAST_ALL").dispatch(this.jedisManager);
             }
         }, 0L, 5L, TimeUnit.SECONDS);
 

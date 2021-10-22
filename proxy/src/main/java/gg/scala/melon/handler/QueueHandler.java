@@ -66,10 +66,11 @@ public class QueueHandler implements IQueueHandler {
         return CompletableFuture.supplyAsync(() -> {
             final AtomicReference<ServerData> serverDataAtomicReference = new AtomicReference<>();
 
-            QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
+            QueueProxy.getInstance().getJedisManager().useResource(jedis -> {
                 final String jedisValue = jedis.hget(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE, serverName);
 
                 serverDataAtomicReference.set(QueueGlobalConstants.GSON.fromJson(jedisValue, ServerData.class));
+                return null;
             });
 
             return serverDataAtomicReference.get();

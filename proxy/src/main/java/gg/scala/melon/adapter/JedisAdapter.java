@@ -1,13 +1,13 @@
 package gg.scala.melon.adapter;
 
+import gg.scala.banana.annotate.Subscribe;
+import gg.scala.banana.message.Message;
+import gg.scala.banana.subscribe.marker.BananaHandler;
 import gg.scala.melon.QueueProxy;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.logger.QueueLogger;
 import gg.scala.melon.commons.queue.impl.ParentQueue;
 import gg.scala.melon.commons.queue.impl.child.ChildQueue;
-import com.solexgames.xenon.redis.annotation.Subscription;
-import com.solexgames.xenon.redis.handler.JedisHandler;
-import com.solexgames.xenon.redis.json.JsonAppender;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -18,31 +18,32 @@ import java.util.concurrent.CompletableFuture;
  * @since 7/25/2021
  */
 
-public class JedisAdapter implements JedisHandler {
+public class JedisAdapter implements BananaHandler {
 
-    @Subscription(action = "QUEUE_DATA_UPDATE")
-    public void onQueueDataUpdate(JsonAppender jsonAppender) {
-        final String parentQueueName = jsonAppender.getParam("PARENT");
+    @Subscribe("QUEUE_DATA_UPDATE")
+    public void onQueueDataUpdate(Message jsonAppender) {
+        final String parentQueueName = jsonAppender.get("PARENT");
         final ParentQueue parentQueue = QueueProxy.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
 
         if (parentQueue != null) {
-            parentQueue.getSettings().put(jsonAppender.getParam("KEY"), Boolean.parseBoolean(jsonAppender.getParam("VALUE")));
+            parentQueue.getSettings().put(jsonAppender.get("KEY"), Boolean.parseBoolean(jsonAppender.get("VALUE")));
 
             QueueLogger.log("Updated settings for " + parentQueueName);
 
-            QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
+            QueueProxy.getInstance().getJedisManager().useResource(jedis -> {
                 jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), QueueGlobalConstants.GSON.toJson(parentQueue.getSettings()));
+                return null;
             });
         }
     }
 
-    @Subscription(action = "QUEUE_ADD_PLAYER")
-    public void onQueueAddPlayer(JsonAppender jsonAppender) {
-        final String parentQueueName = jsonAppender.getParam("PARENT");
-        final String childQueueName = jsonAppender.getParam("CHILD");
+    @Subscribe("QUEUE_ADD_PLAYER")
+    public void onQueueAddPlayer(Message jsonAppender) {
+        final String parentQueueName = jsonAppender.get("PARENT");
+        final String childQueueName = jsonAppender.get("CHILD");
 
-        final UUID uuid = UUID.fromString(jsonAppender.getParam("PLAYER"));
+        final UUID uuid = UUID.fromString(jsonAppender.get("PLAYER"));
 
         final ParentQueue parentQueue = QueueProxy.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
@@ -54,20 +55,21 @@ public class JedisAdapter implements JedisHandler {
                 CompletableFuture.runAsync(() -> {
                     childQueue.getQueued().add(uuid);
                 }).whenComplete((aBoolean, throwable) -> {
-                    QueueProxy.getInstance().getJedisManager().get((jedis, throwableTwo) -> {
+                    QueueProxy.getInstance().getJedisManager().useResource(jedis -> {
                         jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), QueueGlobalConstants.GSON.toJson(childQueue.getQueued()));
+                        return null;
                     });
                 });
             });
         }
     }
 
-    @Subscription(action = "QUEUE_REMOVE_PLAYER")
-    public void onQueueRemovePlayer(JsonAppender jsonAppender) {
-        final String parentQueueName = jsonAppender.getParam("PARENT");
-        final String childQueueName = jsonAppender.getParam("CHILD");
+    @Subscribe("QUEUE_REMOVE_PLAYER")
+    public void onQueueRemovePlayer(Message jsonAppender) {
+        final String parentQueueName = jsonAppender.get("PARENT");
+        final String childQueueName = jsonAppender.get("CHILD");
 
-        final UUID uuid = UUID.fromString(jsonAppender.getParam("PLAYER"));
+        final UUID uuid = UUID.fromString(jsonAppender.get("PLAYER"));
 
         final ParentQueue parentQueue = QueueProxy.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
@@ -79,17 +81,18 @@ public class JedisAdapter implements JedisHandler {
                 CompletableFuture.runAsync(() -> {
                     childQueue.getQueued().remove(uuid);
                 }).whenComplete((aBoolean, throwable) -> {
-                    QueueProxy.getInstance().getJedisManager().get((jedis, throwableTwo) -> {
+                    QueueProxy.getInstance().getJedisManager().useResource(jedis -> {
                         jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), QueueGlobalConstants.GSON.toJson(childQueue.getQueued()));
+                        return null;
                     });
                 });
             });
         }
     }
 
-    @Subscription(action = "QUEUE_FLUSH")
-    public void onQueueFlush(JsonAppender jsonAppender) {
-        final String parentQueueName = jsonAppender.getParam("PARENT");
+    @Subscribe("QUEUE_FLUSH")
+    public void onQueueFlush(Message jsonAppender) {
+        final String parentQueueName = jsonAppender.get("PARENT");
 
         final ParentQueue parentQueue = QueueProxy.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
@@ -100,10 +103,11 @@ public class JedisAdapter implements JedisHandler {
                     childQueue.getQueued().clear();
                 });
             }).whenComplete((unused1, throwable1) -> {
-                QueueProxy.getInstance().getJedisManager().get((jedis, throwableTwo) -> {
+                QueueProxy.getInstance().getJedisManager().useResource(jedis -> {
                     parentQueue.getChildren().forEach((integer, childQueue) -> {
                         jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), QueueGlobalConstants.GSON.toJson(childQueue.getQueued()));
                     });
+                    return null;
                 });
             });
         }

@@ -67,13 +67,13 @@
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
-            <version>1.12-SNAPSHOT</version>
+            <version>1.16-R0.4</version>
             <scope>provided</scope>
         </dependency>
 
         <!-- internal !-->
         <dependency>
-            <groupId>com.solexgames</groupId>
+            <groupId>gg.scala</groupId>
             <artifactId>commons</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
@@ -81,11 +81,18 @@
 
         <!-- sys !-->
         <dependency>
-            <groupId>com.solexgames.xenon</groupId>
-            <artifactId>xenon-bungee-core</artifactId>
-            <version>LATEST</version>
+            <groupId>gg.scala</groupId>
+            <artifactId>cocoa</artifactId>
+            <version>1.0</version>
             <scope>system</scope>
-            <systemPath>${basedir}/lib/Xenon-BUILD-28bce11.jar</systemPath>
+            <systemPath>${basedir}/lib/Cocoa.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>net.evilblock</groupId>
+            <artifactId>cubed</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/cubed-proxy-1.2.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

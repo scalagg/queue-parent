@@ -1,13 +1,12 @@
 package gg.scala.melon.adapter;
 
+import gg.scala.banana.annotate.Subscribe;
+import gg.scala.banana.message.Message;
+import gg.scala.banana.subscribe.marker.BananaHandler;
 import gg.scala.melon.QueueProxy;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.platform.QueuePlatforms;
 import gg.scala.melon.commons.queue.impl.child.ChildQueue;
-import com.solexgames.xenon.CorePlugin;
-import com.solexgames.xenon.redis.annotation.Subscription;
-import com.solexgames.xenon.redis.handler.JedisHandler;
-import com.solexgames.xenon.redis.json.JsonAppender;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -17,26 +16,28 @@ import java.util.UUID;
  * @since 7/26/2021
  */
 
-public class XenonJedisAdapter implements JedisHandler {
+public class XenonJedisAdapter implements BananaHandler {
 
-    @Subscription(action = "GLOBAL_DISCONNECT")
-    public void onGlobalDisconnect(JsonAppender jsonAppender) {
-        final UUID uuid = UUID.fromString(jsonAppender.getParam("UUID"));
+    @Subscribe("GLOBAL_DISCONNECT")
+    public void onGlobalDisconnect(Message jsonAppender) {
+        final UUID uuid = UUID.fromString(jsonAppender.get("UUID"));
 
         QueuePlatforms.get().getQueueHandler().getParentQueueMap().forEach((s, parentQueue) -> {
             final Optional<ChildQueue> optionalChildQueue = parentQueue.getChildQueue(uuid);
 
             optionalChildQueue.ifPresent(childQueue -> {
-                CorePlugin.getInstance().getJedisManager().publish(
-                        new JsonAppender("QUEUE_REMOVE_PLAYER")
-                                .put("PARENT", parentQueue.getName())
-                                .put("CHILD", childQueue.getName())
-                                .put("PLAYER", uuid.toString())
-                                .getAsJson()
+                final Message removal = new Message("QUEUE_REMOVE_PLAYER");
+                removal.set("PLAYER", uuid.toString());
+                removal.set("PARENT", parentQueue.getName());
+                removal.set("CHILD", childQueue.getName());
+
+                removal.dispatch(
+                        QueueProxy.getInstance().getJedisManager()
                 );
 
-                QueueProxy.getInstance().getJedisManager().get((jedis, throwable) -> {
+                QueueProxy.getInstance().getJedisManager().useResource(jedis -> {
                     jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), QueueGlobalConstants.GSON.toJson(parentQueue.getSettings()));
+                    return null;
                 });
             });
         });

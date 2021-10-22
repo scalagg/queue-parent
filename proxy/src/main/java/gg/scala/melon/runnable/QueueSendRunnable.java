@@ -1,11 +1,11 @@
 package gg.scala.melon.runnable;
 
+import gg.scala.banana.message.Message;
 import gg.scala.melon.QueueProxy;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.model.server.ServerData;
 import gg.scala.melon.commons.queue.impl.child.ChildQueue;
 import gg.scala.melon.handler.QueueHandler;
-import com.solexgames.xenon.redis.json.JsonAppender;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -57,20 +57,22 @@ public class QueueSendRunnable implements Runnable {
                             final UUID uuid = childQueue.getQueued().poll();
 
                             if (uuid != null) {
-                                QueueProxy.getInstance().getJedisManager().publish(
-                                        new JsonAppender("QUEUE_SEND_PLAYER")
-                                                .put("PLAYER_ID", uuid.toString())
-                                                .put("PARENT", parentQueue.getName())
-                                                .put("CHILD", childQueue.getName())
-                                                .getAsJson()
+                                final Message message = new Message("QUEUE_SEND_PLAYER");
+                                message.set("PLAYER_ID", uuid.toString());
+                                message.set("PARENT", parentQueue.getName());
+                                message.set("CHILD", childQueue.getName());
+
+                                message.dispatch(
+                                        QueueProxy.getInstance().getJedisManager()
                                 );
 
-                                QueueProxy.getInstance().getJedisManager().publish(
-                                        new JsonAppender("QUEUE_REMOVE_PLAYER")
-                                                .put("PARENT", parentQueue.getName())
-                                                .put("CHILD", childQueue.getName())
-                                                .put("PLAYER", uuid.toString())
-                                                .getAsJson()
+                                final Message removal = new Message("QUEUE_REMOVE_PLAYER");
+                                removal.set("PLAYER", uuid.toString());
+                                removal.set("PARENT", parentQueue.getName());
+                                removal.set("CHILD", childQueue.getName());
+
+                                removal.dispatch(
+                                        QueueProxy.getInstance().getJedisManager()
                                 );
                             }
 

@@ -12,6 +12,6 @@ import gg.scala.melon.commons.platform.QueuePlatforms;
 public class QueueLogger {
 
     public static void log(String message) {
-        QueuePlatforms.get().getLogger().info("\u001B[32m" + "[Internal] " + message);
+        QueuePlatforms.get().getLogger().info(message);
     }
 }
