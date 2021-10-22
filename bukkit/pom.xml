@@ -105,5 +105,13 @@
             <scope>system</scope>
             <systemPath>${basedir}/lib/Cookie.jar</systemPath>
         </dependency>
+
+        <dependency>
+            <groupId>me.lucko</groupId>
+            <artifactId>helper</artifactId>
+            <version>5.6.8</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/helper.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

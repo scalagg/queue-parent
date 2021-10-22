@@ -2,13 +2,13 @@
 queues:
   na-practice:
     fancyName: "NA Practice"
-    serverName: "na-hub-02"
+    serverName: "hub-2"
     children:
       fast-pass:
         fancyName: "Fast Pass"
         permission: "queue.lanes.fastpass"
         priority: 1
-# server-specific data - Only needed if you aren't using Scandium
+# server-specific data - Only needed if you aren't using Lemon
 server-id: "something-something"
 redis:
   host: "127.0.0.1"
@@ -19,4 +19,4 @@ redis:
 # Per-player priorities - Format them like this: permission:weight
 priorities:
   - permission:weight
-  - scandium.staff:100
+  - lemon.staff:100

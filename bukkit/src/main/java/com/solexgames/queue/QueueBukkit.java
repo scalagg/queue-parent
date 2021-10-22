@@ -1,17 +1,5 @@
 package com.solexgames.queue;
 
-import com.solexgames.core.CorePlugin;
-import com.solexgames.core.server.NetworkServer;
-import com.solexgames.core.util.BungeeUtil;
-import com.solexgames.lib.acf.BaseCommand;
-import com.solexgames.lib.acf.ConditionFailedException;
-import com.solexgames.lib.acf.InvalidCommandArgument;
-import com.solexgames.lib.acf.PaperCommandManager;
-import com.solexgames.lib.acf.annotation.CommandAlias;
-import com.solexgames.lib.acf.annotation.Name;
-import com.solexgames.lib.commons.redis.JedisBuilder;
-import com.solexgames.lib.commons.redis.JedisManager;
-import com.solexgames.lib.processor.config.ConfigFactory;
 import com.solexgames.queue.adapter.JedisAdapter;
 import com.solexgames.queue.cache.NamingSchemeCache;
 import com.solexgames.queue.command.JoinQueueCommand;
@@ -31,9 +19,6 @@ import com.solexgames.queue.provider.impl.DefaultSettingsProvider;
 import com.solexgames.queue.provider.impl.ScandiumSettingsProvider;
 import com.solexgames.queue.runnable.QueueServerUpdateRunnable;
 import lombok.Getter;
-import me.lucko.helper.Events;
-import me.lucko.helper.Schedulers;
-import me.lucko.helper.plugin.ExtendedJavaPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
