@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.solexgames</groupId>
-        <artifactId>queue-parent</artifactId>
+        <groupId>gg.scala</groupId>
+        <artifactId>melon-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 

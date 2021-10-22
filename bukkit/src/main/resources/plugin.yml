@@ -1,8 +1,8 @@
-name: queue-bukkit
-version: ${git.commit.id.abbrev}
-main: com.solexgames.queue.QueueBukkit
+name: Melon
+version: 1.0.0
+main: gg.scala.melon.MelonSpigotPlugin
 
-author: SolexGames
-website: https://solexgames.com
+author: Scala
+website: https://scala.gg
 
-depend: [commonlibs-bukkit, Scandium]
+depend: [Cubed, Lemon, Cookie, helper]

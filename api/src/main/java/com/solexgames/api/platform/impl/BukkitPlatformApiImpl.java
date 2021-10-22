@@ -2,12 +2,12 @@ package com.solexgames.api.platform.impl;
 
 import com.solexgames.api.platform.PlatformDependantApi;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
-import com.solexgames.queue.QueueBukkit;
-import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
-import com.solexgames.queue.commons.platform.QueuePlatform;
-import com.solexgames.queue.commons.platform.QueuePlatforms;
-import com.solexgames.queue.commons.queue.impl.ParentQueue;
-import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
+import gg.scala.melon.QueueBukkit;
+import gg.scala.melon.commons.model.impl.CachedQueuePlayer;
+import gg.scala.melon.commons.platform.QueuePlatform;
+import gg.scala.melon.commons.platform.QueuePlatforms;
+import gg.scala.melon.commons.queue.impl.ParentQueue;
+import gg.scala.melon.commons.queue.impl.child.ChildQueue;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;

@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.solexgames</groupId>
-        <artifactId>queue-parent</artifactId>
+        <groupId>gg.scala</groupId>
+        <artifactId>melon-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
@@ -54,7 +54,7 @@
             </resource>
         </resources>
 
-        <finalName>queue-bukkit</finalName>
+        <finalName>Melon</finalName>
     </build>
 
     <repositories>
@@ -104,6 +104,12 @@
             <version>1.0</version>
             <scope>system</scope>
             <systemPath>${basedir}/lib/Cookie.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.mkotb</groupId>
+            <artifactId>ConfigAPI</artifactId>
+            <version>e1c8df3f13</version>
         </dependency>
 
         <dependency>

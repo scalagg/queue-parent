@@ -3,7 +3,7 @@ package com.solexgames.api;
 import com.solexgames.api.platform.PlatformDependantApi;
 import com.solexgames.api.platform.impl.BukkitPlatformApiImpl;
 import com.solexgames.api.platform.impl.BungeeCordPlatformApiImpl;
-import com.solexgames.queue.commons.cache.ClassCache;
+import gg.scala.melon.commons.cache.ClassCache;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,9 +1,9 @@
 package com.solexgames.api.platform;
 
-import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
-import com.solexgames.queue.commons.platform.QueuePlatform;
-import com.solexgames.queue.commons.queue.impl.ParentQueue;
-import com.solexgames.queue.commons.queue.impl.child.ChildQueue;
+import gg.scala.melon.commons.model.impl.CachedQueuePlayer;
+import gg.scala.melon.commons.platform.QueuePlatform;
+import gg.scala.melon.commons.queue.impl.ParentQueue;
+import gg.scala.melon.commons.queue.impl.child.ChildQueue;
 
 import java.util.List;
 import java.util.UUID;
