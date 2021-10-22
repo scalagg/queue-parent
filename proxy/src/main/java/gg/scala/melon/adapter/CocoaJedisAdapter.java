@@ -16,7 +16,7 @@ import java.util.UUID;
  * @since 7/26/2021
  */
 
-public class XenonJedisAdapter implements BananaHandler {
+public class CocoaJedisAdapter implements BananaHandler {
 
     @Subscribe("GLOBAL_DISCONNECT")
     public void onGlobalDisconnect(Message jsonAppender) {

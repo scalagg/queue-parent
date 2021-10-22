@@ -1,7 +1,13 @@
 package gg.scala.melon;
 
 import gg.scala.banana.Banana;
+import gg.scala.banana.BananaBuilder;
+import gg.scala.banana.credentials.BananaCredentials;
+import gg.scala.banana.handler.impl.DefaultExceptionHandler;
 import gg.scala.banana.message.Message;
+import gg.scala.banana.options.BananaOptions;
+import gg.scala.cocoa.CocoaProxyPlugin;
+import gg.scala.melon.adapter.JedisAdapter;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.logger.QueueLogger;
 import gg.scala.melon.commons.platform.QueuePlatform;
@@ -10,6 +16,7 @@ import gg.scala.melon.handler.QueueHandler;
 import gg.scala.melon.runnable.QueueSendRunnable;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import net.evilblock.cubed.serializers.Serializers;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -18,6 +25,7 @@ import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.File;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -45,17 +53,27 @@ public final class MelonProxyPlugin extends Plugin implements QueuePlatform {
         this.queueHandler = new QueueHandler(configuration);
         this.queueHandler.loadQueuesFromConfiguration();
 
-//        this.jedisManager = new JedisBuilder()
-//                .withChannel("queue_global")
-//                .withHandler(new JedisAdapter())
-//                .withSettings(CorePlugin.getInstance().getJedisManager().getSettings())
-//                .build();
-//
-//        this.xenonJedisManager = new JedisBuilder()
-//                .withChannel("scandium:bungee")
-//                .withHandler(new XenonJedisAdapter())
-//                .withSettings(CorePlugin.getInstance().getJedisManager().getSettings())
-//                .build();
+        this.jedisManager = new BananaBuilder()
+                .credentials(
+                        new BananaCredentials(
+                                CocoaProxyPlugin.getInstance().getConfig().getString("redis.address"),
+                                CocoaProxyPlugin.getInstance().getConfig().getInt("redis.port"),
+                                CocoaProxyPlugin.getInstance().getConfig().getBoolean("redis.authentication"),
+                                CocoaProxyPlugin.getInstance().getConfig().getString("redis.password")
+                        )
+                )
+                .options(
+                        new BananaOptions(
+                                "queue_global",
+                                true, false, true,
+                                Serializers.getGson(),
+                                DefaultExceptionHandler.INSTANCE,
+                                ForkJoinPool.commonPool()
+                        )
+                )
+                .build();
+        this.jedisManager.registerClass(new JedisAdapter());
+        this.jedisManager.subscribe();
 
         QueuePlatforms.setPlatform(this);
 

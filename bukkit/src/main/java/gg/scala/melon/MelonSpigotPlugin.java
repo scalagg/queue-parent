@@ -6,6 +6,7 @@ import gg.scala.banana.handler.impl.DefaultExceptionHandler;
 import gg.scala.banana.options.BananaOptions;
 import gg.scala.commons.ExtendedScalaPlugin;
 import gg.scala.lemon.Lemon;
+import gg.scala.melon.adapter.MelonMessageHandler;
 import gg.scala.melon.cache.NamingSchemeCache;
 import gg.scala.melon.command.JoinQueueCommand;
 import gg.scala.melon.command.LeaveQueueCommand;
@@ -183,6 +184,8 @@ public final class MelonSpigotPlugin extends ExtendedScalaPlugin implements Queu
                         )
                 )
                 .build();
+        this.jedisManager.registerClass(new MelonMessageHandler());
+        this.jedisManager.subscribe();
 
         this.playerHandler = new PlayerHandler(this.jedisManager);
     }

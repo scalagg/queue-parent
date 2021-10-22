@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
  * @since 7/24/2021
  */
 
-public class JedisAdapter implements BananaHandler {
+public class MelonMessageHandler implements BananaHandler {
 
     @Subscribe("QUEUE_DATA_UPDATE")
     public void onQueueDataUpdate(Message jsonAppender) {
