@@ -72,7 +72,7 @@ public class QueueHandler implements IQueueHandler {
 
         this.permissionPriorityMap = MapUtil.sortByValue(unsortedDeserializedMap);
 
-        MelonSpigotPlugin.getInstance().getJedisManager().runCommand(jedis -> {
+        MelonSpigotPlugin.getInstance().getJedisManager().useResource(jedis -> {
             final Map<String, String> jedisValues = jedis.hgetAll(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE);
 
             if (jedisValues != null) {
@@ -94,9 +94,11 @@ public class QueueHandler implements IQueueHandler {
                     }
                 });
             }
+
+            return null;
         });
 
-        MelonSpigotPlugin.getInstance().getJedisManager().runCommand(jedis -> {
+        MelonSpigotPlugin.getInstance().getJedisManager().useResource(jedis -> {
             final Map<String, String> jedisValues = jedis.hgetAll(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE);
 
             if (jedisValues != null) {
@@ -108,6 +110,8 @@ public class QueueHandler implements IQueueHandler {
                     }
                 });
             }
+
+            return null;
         });
     }
 
@@ -124,10 +128,11 @@ public class QueueHandler implements IQueueHandler {
         return CompletableFuture.supplyAsync(() -> {
             final AtomicReference<ServerData> serverDataAtomicReference = new AtomicReference<>();
 
-            MelonSpigotPlugin.getInstance().getJedisManager().runCommand(jedis -> {
+            MelonSpigotPlugin.getInstance().getJedisManager().useResource(jedis -> {
                 final String jedisValue = jedis.hget(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE, serverName);
-
                 serverDataAtomicReference.set(QueueGlobalConstants.GSON.fromJson(jedisValue, ServerData.class));
+
+                return null;
             });
 
             return serverDataAtomicReference.get();
@@ -144,7 +149,7 @@ public class QueueHandler implements IQueueHandler {
         return CompletableFuture.supplyAsync(() -> {
             final AtomicReference<Map<String, ServerData>> serverDataAtomicReference = new AtomicReference<>();
 
-            MelonSpigotPlugin.getInstance().getJedisManager().runCommand(jedis -> {
+            MelonSpigotPlugin.getInstance().getJedisManager().useResource(jedis -> {
                 final Map<String, String> jedisValue = jedis.hgetAll(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE);
                 final Map<String, ServerData> deserialized = new HashMap<>();
 
@@ -153,6 +158,8 @@ public class QueueHandler implements IQueueHandler {
                 });
 
                 serverDataAtomicReference.set(deserialized);
+
+                return null;
             });
 
             return serverDataAtomicReference.get();

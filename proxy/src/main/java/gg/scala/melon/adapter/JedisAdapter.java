@@ -3,7 +3,7 @@ package gg.scala.melon.adapter;
 import gg.scala.banana.annotate.Subscribe;
 import gg.scala.banana.message.Message;
 import gg.scala.banana.subscribe.marker.BananaHandler;
-import gg.scala.melon.QueueProxy;
+import gg.scala.melon.MelonProxyPlugin;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.logger.QueueLogger;
 import gg.scala.melon.commons.queue.impl.ParentQueue;
@@ -23,7 +23,7 @@ public class JedisAdapter implements BananaHandler {
     @Subscribe("QUEUE_DATA_UPDATE")
     public void onQueueDataUpdate(Message jsonAppender) {
         final String parentQueueName = jsonAppender.get("PARENT");
-        final ParentQueue parentQueue = QueueProxy.getInstance().getQueueHandler()
+        final ParentQueue parentQueue = MelonProxyPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
 
         if (parentQueue != null) {
@@ -31,7 +31,7 @@ public class JedisAdapter implements BananaHandler {
 
             QueueLogger.log("Updated settings for " + parentQueueName);
 
-            QueueProxy.getInstance().getJedisManager().useResource(jedis -> {
+            MelonProxyPlugin.getInstance().getJedisManager().useResource(jedis -> {
                 jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), QueueGlobalConstants.GSON.toJson(parentQueue.getSettings()));
                 return null;
             });
@@ -45,7 +45,7 @@ public class JedisAdapter implements BananaHandler {
 
         final UUID uuid = UUID.fromString(jsonAppender.get("PLAYER"));
 
-        final ParentQueue parentQueue = QueueProxy.getInstance().getQueueHandler()
+        final ParentQueue parentQueue = MelonProxyPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
 
         if (parentQueue != null) {
@@ -55,7 +55,7 @@ public class JedisAdapter implements BananaHandler {
                 CompletableFuture.runAsync(() -> {
                     childQueue.getQueued().add(uuid);
                 }).whenComplete((aBoolean, throwable) -> {
-                    QueueProxy.getInstance().getJedisManager().useResource(jedis -> {
+                    MelonProxyPlugin.getInstance().getJedisManager().useResource(jedis -> {
                         jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), QueueGlobalConstants.GSON.toJson(childQueue.getQueued()));
                         return null;
                     });
@@ -71,7 +71,7 @@ public class JedisAdapter implements BananaHandler {
 
         final UUID uuid = UUID.fromString(jsonAppender.get("PLAYER"));
 
-        final ParentQueue parentQueue = QueueProxy.getInstance().getQueueHandler()
+        final ParentQueue parentQueue = MelonProxyPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
 
         if (parentQueue != null) {
@@ -81,7 +81,7 @@ public class JedisAdapter implements BananaHandler {
                 CompletableFuture.runAsync(() -> {
                     childQueue.getQueued().remove(uuid);
                 }).whenComplete((aBoolean, throwable) -> {
-                    QueueProxy.getInstance().getJedisManager().useResource(jedis -> {
+                    MelonProxyPlugin.getInstance().getJedisManager().useResource(jedis -> {
                         jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), QueueGlobalConstants.GSON.toJson(childQueue.getQueued()));
                         return null;
                     });
@@ -94,7 +94,7 @@ public class JedisAdapter implements BananaHandler {
     public void onQueueFlush(Message jsonAppender) {
         final String parentQueueName = jsonAppender.get("PARENT");
 
-        final ParentQueue parentQueue = QueueProxy.getInstance().getQueueHandler()
+        final ParentQueue parentQueue = MelonProxyPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
 
         if (parentQueue != null) {
@@ -103,7 +103,7 @@ public class JedisAdapter implements BananaHandler {
                     childQueue.getQueued().clear();
                 });
             }).whenComplete((unused1, throwable1) -> {
-                QueueProxy.getInstance().getJedisManager().useResource(jedis -> {
+                MelonProxyPlugin.getInstance().getJedisManager().useResource(jedis -> {
                     parentQueue.getChildren().forEach((integer, childQueue) -> {
                         jedis.hset(QueueGlobalConstants.JEDIS_KEY_QUEUE_CACHE, parentQueue.getName() + ":" + childQueue.getName(), QueueGlobalConstants.GSON.toJson(childQueue.getQueued()));
                     });

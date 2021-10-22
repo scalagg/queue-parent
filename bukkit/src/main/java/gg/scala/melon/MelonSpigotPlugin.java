@@ -189,8 +189,9 @@ public final class MelonSpigotPlugin extends ExtendedScalaPlugin implements Queu
 
     @Override
     public void disable() {
-        this.jedisManager.runCommand(jedis -> {
-            jedis.hdel(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE, this.settingsProvider.getServerName());
+        this.jedisManager.useResource(jedis -> {
+            jedis.hdel(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE, Lemon.getInstance().getSettings().getId());
+            return null;
         });
     }
 }

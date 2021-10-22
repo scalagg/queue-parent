@@ -1,6 +1,6 @@
 package gg.scala.melon.commons.impl;
 
-import gg.scala.crates.commons.PlayerCache;
+import gg.scala.melon.commons.PlayerCache;
 
 /**
  * @author GrowlyX

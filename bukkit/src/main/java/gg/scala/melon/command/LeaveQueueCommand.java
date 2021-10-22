@@ -1,14 +1,14 @@
 package gg.scala.melon.command;
 
-import net.evilblock.cubed.acf.BaseCommand;
-import net.evilblock.cubed.acf.ConditionFailedException;
-import net.evilblock.cubed.acf.annotation.*;
-import com.solexgames.lib.commons.redis.json.JsonAppender;
+import gg.scala.banana.message.Message;
 import gg.scala.melon.MelonSpigotPlugin;
 import gg.scala.melon.commons.model.impl.CachedQueuePlayer;
 import gg.scala.melon.commons.queue.impl.ParentQueue;
 import gg.scala.melon.commons.queue.impl.child.ChildQueue;
 import gg.scala.melon.internal.QueueBukkitSettings;
+import net.evilblock.cubed.acf.BaseCommand;
+import net.evilblock.cubed.acf.ConditionFailedException;
+import net.evilblock.cubed.acf.annotation.*;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -72,12 +72,13 @@ public class LeaveQueueCommand extends BaseCommand {
 
         if (childQueue != null) {
             CompletableFuture.runAsync(() -> {
-                MelonSpigotPlugin.getInstance().getJedisManager().publish(
-                        new JsonAppender("QUEUE_REMOVE_PLAYER")
-                                .put("PARENT", parentQueue.getName())
-                                .put("CHILD", childQueue.getName())
-                                .put("PLAYER", queuePlayer.getUniqueId().toString())
-                                .getAsJson()
+                final Message removal = new Message("QUEUE_REMOVE_PLAYER");
+                removal.set("PLAYER", queuePlayer.getUniqueId().toString());
+                removal.set("PARENT", parentQueue.getName());
+                removal.set("CHILD", childQueue.getName());
+
+                removal.dispatch(
+                        MelonSpigotPlugin.getInstance().getJedisManager()
                 );
             }).whenComplete((unused, throwable) -> {
                 if (throwable != null) {

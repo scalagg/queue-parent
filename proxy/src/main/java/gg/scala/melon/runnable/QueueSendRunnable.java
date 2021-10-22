@@ -1,7 +1,7 @@
 package gg.scala.melon.runnable;
 
 import gg.scala.banana.message.Message;
-import gg.scala.melon.QueueProxy;
+import gg.scala.melon.MelonProxyPlugin;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.model.server.ServerData;
 import gg.scala.melon.commons.queue.impl.child.ChildQueue;
@@ -26,7 +26,7 @@ public class QueueSendRunnable implements Runnable {
     public void run() {
         CompletableFuture.runAsync(() -> {
             this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
-                final CompletableFuture<ServerData> serverDataCompletableFuture = QueueProxy.getInstance()
+                final CompletableFuture<ServerData> serverDataCompletableFuture = MelonProxyPlugin.getInstance()
                         .getQueueHandler().fetchServerData(parentQueue.getTargetServer());
 
                 serverDataCompletableFuture.whenComplete((serverData, throwable) -> {
@@ -63,7 +63,7 @@ public class QueueSendRunnable implements Runnable {
                                 message.set("CHILD", childQueue.getName());
 
                                 message.dispatch(
-                                        QueueProxy.getInstance().getJedisManager()
+                                        MelonProxyPlugin.getInstance().getJedisManager()
                                 );
 
                                 final Message removal = new Message("QUEUE_REMOVE_PLAYER");
@@ -72,7 +72,7 @@ public class QueueSendRunnable implements Runnable {
                                 removal.set("CHILD", childQueue.getName());
 
                                 removal.dispatch(
-                                        QueueProxy.getInstance().getJedisManager()
+                                        MelonProxyPlugin.getInstance().getJedisManager()
                                 );
                             }
 

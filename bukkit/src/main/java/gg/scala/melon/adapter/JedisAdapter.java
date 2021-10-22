@@ -1,8 +1,8 @@
 package gg.scala.melon.adapter;
 
-import com.solexgames.lib.commons.redis.annotation.Subscription;
-import com.solexgames.lib.commons.redis.handler.JedisHandler;
-import com.solexgames.lib.commons.redis.json.JsonAppender;
+import gg.scala.banana.annotate.Subscribe;
+import gg.scala.banana.message.Message;
+import gg.scala.banana.subscribe.marker.BananaHandler;
 import gg.scala.melon.MelonSpigotPlugin;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.model.impl.CachedQueuePlayer;
@@ -23,25 +23,25 @@ import java.util.concurrent.CompletableFuture;
  * @since 7/24/2021
  */
 
-public class JedisAdapter implements JedisHandler {
+public class JedisAdapter implements BananaHandler {
 
-    @Subscription(action = "QUEUE_DATA_UPDATE")
-    public void onQueueDataUpdate(JsonAppender jsonAppender) {
-        final String parentQueueName = jsonAppender.getParam("PARENT");
+    @Subscribe("QUEUE_DATA_UPDATE")
+    public void onQueueDataUpdate(Message jsonAppender) {
+        final String parentQueueName = jsonAppender.get("PARENT");
         final ParentQueue parentQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
 
         if (parentQueue != null) {
-            parentQueue.getSettings().put(jsonAppender.getParam("KEY"), Boolean.parseBoolean(jsonAppender.getParam("VALUE")));
+            parentQueue.getSettings().put(jsonAppender.get("KEY"), Boolean.parseBoolean(jsonAppender.get("VALUE")));
         }
     }
 
-    @Subscription(action = "QUEUE_ADD_PLAYER")
-    public void onQueueAddPlayer(JsonAppender jsonAppender) {
-        final String parentQueueName = jsonAppender.getParam("PARENT");
-        final String childQueueName = jsonAppender.getParam("CHILD");
+    @Subscribe("QUEUE_ADD_PLAYER")
+    public void onQueueAddPlayer(Message jsonAppender) {
+        final String parentQueueName = jsonAppender.get("PARENT");
+        final String childQueueName = jsonAppender.get("CHILD");
 
-        final UUID uuid = UUID.fromString(jsonAppender.getParam("PLAYER"));
+        final UUID uuid = UUID.fromString(jsonAppender.get("PLAYER"));
 
         final ParentQueue parentQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
@@ -55,11 +55,11 @@ public class JedisAdapter implements JedisHandler {
         }
     }
 
-    @Subscription(action = "QUEUE_REMOVE_PLAYER")
-    public void onQueueRemovePlayer(JsonAppender jsonAppender) {
-        final String parentQueueName = jsonAppender.getParam("PARENT");
-        final String childQueueName = jsonAppender.getParam("CHILD");
-        final UUID uuid = UUID.fromString(jsonAppender.getParam("PLAYER"));
+    @Subscribe("QUEUE_REMOVE_PLAYER")
+    public void onQueueRemovePlayer(Message jsonAppender) {
+        final String parentQueueName = jsonAppender.get("PARENT");
+        final String childQueueName = jsonAppender.get("CHILD");
+        final UUID uuid = UUID.fromString(jsonAppender.get("PLAYER"));
 
         final ParentQueue parentQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
@@ -73,9 +73,9 @@ public class JedisAdapter implements JedisHandler {
         }
     }
 
-    @Subscription(action = "QUEUE_FLUSH")
-    public void onQueueFlush(JsonAppender jsonAppender) {
-        final String parentQueueName = jsonAppender.getParam("PARENT");
+    @Subscribe("QUEUE_FLUSH")
+    public void onQueueFlush(Message jsonAppender) {
+        final String parentQueueName = jsonAppender.get("PARENT");
 
         final ParentQueue parentQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
                 .getParentQueueMap().get(parentQueueName);
@@ -99,17 +99,17 @@ public class JedisAdapter implements JedisHandler {
         }
     }
 
-    @Subscription(action = "QUEUE_SEND_PLAYER")
-    public void onQueueSend(JsonAppender jsonAppender) {
-        final UUID uuid = UUID.fromString(jsonAppender.getParam("PLAYER_ID"));
+    @Subscribe("QUEUE_SEND_PLAYER")
+    public void onQueueSend(Message jsonAppender) {
+        final UUID uuid = UUID.fromString(jsonAppender.get("PLAYER_ID"));
         final CachedQueuePlayer queuePlayer = MelonSpigotPlugin.getInstance().getPlayerHandler().getByUuid(uuid);
 
         if (queuePlayer != null) {
             final ParentQueue parentQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
-                    .getParentQueueMap().get(jsonAppender.getParam("PARENT"));
+                    .getParentQueueMap().get(jsonAppender.get("PARENT"));
 
             if (parentQueue != null) {
-                final ChildQueue childQueue = parentQueue.getChildQueue(jsonAppender.getParam("CHILD"))
+                final ChildQueue childQueue = parentQueue.getChildQueue(jsonAppender.get("CHILD"))
                         .orElse(null);
 
                 if (childQueue != null) {
@@ -119,11 +119,12 @@ public class JedisAdapter implements JedisHandler {
                         player.sendMessage(ChatColor.GREEN + "You're now being sent to " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.GREEN + ".");
 
                         CompletableFuture.runAsync(() -> {
-                            MelonSpigotPlugin.getInstance().getBungeeJedisManager().publish(
-                                    new JsonAppender("SEND_SERVER")
-                                            .put("PLAYER", queuePlayer.getName())
-                                            .put("SERVER", parentQueue.getTargetServer())
-                                            .getAsJson()
+                            final Message message = new Message("SEND_SERVER");
+                            message.set("PLAYER", queuePlayer.getName());
+                            message.set("SERVER", parentQueue.getTargetServer());
+
+                            message.dispatch(
+                                    MelonSpigotPlugin.getInstance().getJedisManager()
                             );
                         }).whenComplete((unused, throwable) -> {
                             if (throwable != null) {
@@ -136,8 +137,8 @@ public class JedisAdapter implements JedisHandler {
         }
     }
 
-    @Subscription(action = "QUEUE_BROADCAST_ALL")
-    public void onQueueBroadcast(JsonAppender jsonAppender) {
+    @Subscribe("QUEUE_BROADCAST_ALL")
+    public void onQueueBroadcast(Message jsonAppender) {
         QueuePlatforms.get().getQueueHandler().getParentQueueMap().values().forEach(parentQueue -> {
             final CompletableFuture<ServerData> completableFuture = MelonSpigotPlugin.getInstance().getQueueHandler()
                     .fetchServerData(parentQueue.getTargetServer());

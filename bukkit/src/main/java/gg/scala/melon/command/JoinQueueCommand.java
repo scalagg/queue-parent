@@ -1,5 +1,6 @@
 package gg.scala.melon.command;
 
+import gg.scala.banana.message.Message;
 import net.evilblock.cubed.acf.BaseCommand;
 import net.evilblock.cubed.acf.ConditionFailedException;
 import net.evilblock.cubed.acf.annotation.*;
@@ -67,12 +68,13 @@ public class JoinQueueCommand extends BaseCommand {
             final ChildQueue bestChildQueue = MelonSpigotPlugin.getInstance().getQueueHandler()
                     .fetchBestChildQueue(parentQueue, player);
 
-            MelonSpigotPlugin.getInstance().getJedisManager().publish(
-                    new JsonAppender("QUEUE_ADD_PLAYER")
-                            .put("PARENT", parentQueue.getName())
-                            .put("CHILD", bestChildQueue.getName())
-                            .put("PLAYER", queuePlayer.getUniqueId().toString())
-                            .getAsJson()
+            final Message removal = new Message("QUEUE_ADD_PLAYER");
+            removal.set("PLAYER", queuePlayer.getUniqueId().toString());
+            removal.set("PARENT", parentQueue.getName());
+            removal.set("CHILD", bestChildQueue.getName());
+
+            removal.dispatch(
+                    MelonSpigotPlugin.getInstance().getJedisManager()
             );
 
             return bestChildQueue;

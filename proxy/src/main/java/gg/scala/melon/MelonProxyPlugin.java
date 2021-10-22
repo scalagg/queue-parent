@@ -2,8 +2,6 @@ package gg.scala.melon;
 
 import gg.scala.banana.Banana;
 import gg.scala.banana.message.Message;
-import gg.scala.melon.adapter.JedisAdapter;
-import gg.scala.melon.adapter.XenonJedisAdapter;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.logger.QueueLogger;
 import gg.scala.melon.commons.platform.QueuePlatform;
@@ -24,10 +22,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Getter
-public final class QueueProxy extends Plugin implements QueuePlatform {
+public final class MelonProxyPlugin extends Plugin implements QueuePlatform {
 
     @Getter
-    private static QueueProxy instance;
+    private static MelonProxyPlugin instance;
 
     private QueueHandler queueHandler;
 

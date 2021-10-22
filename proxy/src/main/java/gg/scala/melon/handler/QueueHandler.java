@@ -1,6 +1,6 @@
 package gg.scala.melon.handler;
 
-import gg.scala.melon.QueueProxy;
+import gg.scala.melon.MelonProxyPlugin;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.model.server.ServerData;
 import gg.scala.melon.commons.platform.handler.IQueueHandler;
@@ -66,7 +66,7 @@ public class QueueHandler implements IQueueHandler {
         return CompletableFuture.supplyAsync(() -> {
             final AtomicReference<ServerData> serverDataAtomicReference = new AtomicReference<>();
 
-            QueueProxy.getInstance().getJedisManager().useResource(jedis -> {
+            MelonProxyPlugin.getInstance().getJedisManager().useResource(jedis -> {
                 final String jedisValue = jedis.hget(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE, serverName);
 
                 serverDataAtomicReference.set(QueueGlobalConstants.GSON.fromJson(jedisValue, ServerData.class));

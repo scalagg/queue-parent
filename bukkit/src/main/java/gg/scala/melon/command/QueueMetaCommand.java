@@ -1,10 +1,10 @@
 package gg.scala.melon.command;
 
+import gg.scala.banana.message.Message;
 import net.evilblock.cubed.acf.BaseCommand;
 import net.evilblock.cubed.acf.CommandHelp;
 import net.evilblock.cubed.acf.ConditionFailedException;
 import net.evilblock.cubed.acf.annotation.*;
-import com.solexgames.lib.commons.redis.json.JsonAppender;
 import gg.scala.melon.MelonSpigotPlugin;
 import gg.scala.melon.MelonSpigotConstants;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
@@ -45,12 +45,13 @@ public class QueueMetaCommand extends BaseCommand {
             throw new ConditionFailedException("There is no queue named " + ChatColor.YELLOW + parent + ChatColor.RED + ".");
         }
 
-        MelonSpigotPlugin.getInstance().getJedisManager().publish(
-                new JsonAppender("QUEUE_DATA_UPDATE")
-                        .put("PARENT", parentQueue.getName())
-                        .put("KEY", key)
-                        .put("VALUE", value)
-                        .getAsJson()
+        final Message message = new Message("QUEUE_DATA_UPDATE");
+        message.set("PARENT", parentQueue.getName());
+        message.set("KEY", key);
+        message.set("VALUE", Boolean.toString(value));
+
+        message.dispatch(
+                MelonSpigotPlugin.getInstance().getJedisManager()
         );
 
         player.sendMessage(MelonSpigotConstants.PREFIX + ChatColor.YELLOW + "Updated " + ChatColor.GOLD + key + ChatColor.YELLOW + " to " + ChatColor.AQUA + value + ChatColor.YELLOW + ".");
@@ -61,10 +62,11 @@ public class QueueMetaCommand extends BaseCommand {
     @CommandCompletion("@parents")
     @Description("Kick all players (in all lanes) out of a parent queue.")
     public void onFlush(Player player, ParentQueue parentQueue) {
-        MelonSpigotPlugin.getInstance().getJedisManager().publish(
-                new JsonAppender("QUEUE_FLUSH")
-                        .put("PARENT", parentQueue.getName())
-                        .getAsJson()
+        final Message message = new Message("QUEUE_FLUSH");
+        message.set("PARENT", parentQueue.getName());
+
+        message.dispatch(
+                MelonSpigotPlugin.getInstance().getJedisManager()
         );
 
         player.sendMessage(MelonSpigotConstants.PREFIX + ChatColor.YELLOW + "Flushed parent queue " + ChatColor.GOLD + parentQueue.getFancyName() + ChatColor.YELLOW + ".");
