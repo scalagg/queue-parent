@@ -1,5 +1,6 @@
 package com.solexgames.queue.commons.model.impl;
 
+import com.solexgames.queue.commons.constants.QueueGlobalConstants;
 import com.solexgames.queue.commons.model.QueuePlayer;
 import com.solexgames.queue.commons.platform.QueuePlatforms;
 import lombok.Getter;
@@ -15,15 +16,20 @@ import java.util.UUID;
  * Cached player-data with queue information
  */
 
-@Getter
+@Getter @Setter
 @RequiredArgsConstructor
 public class CachedQueuePlayer extends QueuePlayer implements Comparable<CachedQueuePlayer> {
 
     private final String name;
     private final UUID uniqueId;
 
-    @Setter
     private int priority;
+
+    private long lastQueued = -1;
+
+    public boolean isCanQueue() {
+        return this.lastQueued == -1 || System.currentTimeMillis() >= this.lastQueued + QueueGlobalConstants.TWO_SECONDS;
+    }
 
     @Override
     public int compareTo(CachedQueuePlayer cachedQueuePlayer) {

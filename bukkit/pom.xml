@@ -84,20 +84,26 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- sys !-->
         <dependency>
-            <groupId>com.solexgames.lib</groupId>
-            <artifactId>common-libs-bukkit</artifactId>
-            <version>LATEST</version>
+            <groupId>gg.scala</groupId>
+            <artifactId>lemon</artifactId>
+            <version>1.0</version>
             <scope>system</scope>
-            <systemPath>${basedir}/lib/commonslibs-bukkit.jar</systemPath>
+            <systemPath>${basedir}/lib/Lemon.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>com.solexgames.core</groupId>
-            <artifactId>scandium</artifactId>
-            <version>LATEST</version>
+            <groupId>net.evilblock</groupId>
+            <artifactId>cubed</artifactId>
+            <version>1.2</version>
             <scope>system</scope>
-            <systemPath>${basedir}/lib/Scandium.jar</systemPath>
+            <systemPath>${basedir}/lib/cubed-bukkit-1.2.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>gg.scala</groupId>
+            <artifactId>cookie</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/Cookie.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

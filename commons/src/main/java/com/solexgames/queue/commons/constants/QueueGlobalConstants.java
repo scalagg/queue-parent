@@ -34,5 +34,6 @@ public class QueueGlobalConstants {
             .create();
 
     public static final long FIFTEEN_SECONDS = TimeUnit.SECONDS.toMillis(15L);
+    public static final long TWO_SECONDS = TimeUnit.SECONDS.toMillis(2L);
 
 }

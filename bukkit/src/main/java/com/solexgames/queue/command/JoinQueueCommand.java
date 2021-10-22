@@ -2,10 +2,7 @@ package com.solexgames.queue.command;
 
 import com.solexgames.lib.acf.BaseCommand;
 import com.solexgames.lib.acf.ConditionFailedException;
-import com.solexgames.lib.acf.annotation.CommandAlias;
-import com.solexgames.lib.acf.annotation.Default;
-import com.solexgames.lib.acf.annotation.Dependency;
-import com.solexgames.lib.acf.annotation.Syntax;
+import com.solexgames.lib.acf.annotation.*;
 import com.solexgames.lib.commons.redis.json.JsonAppender;
 import com.solexgames.queue.QueueBukkit;
 import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
@@ -24,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
  */
 
 @CommandAlias("joinqueue|joinq|queue")
+@CommandPermission("queue.command.joinqueue")
 public class JoinQueueCommand extends BaseCommand {
 
     @Dependency
@@ -36,6 +34,10 @@ public class JoinQueueCommand extends BaseCommand {
 
         if (queuePlayer == null) {
             throw new ConditionFailedException("Something went wrong.");
+        }
+
+        if (!queuePlayer.isCanQueue()) {
+            throw new ConditionFailedException("Please wait a moment before joining another queue");
         }
 
         final List<ParentQueue> queuedServers = QueueBukkit.getInstance().getQueueHandler()

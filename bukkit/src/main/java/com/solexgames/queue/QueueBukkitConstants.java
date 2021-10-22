@@ -1,6 +1,7 @@
 package com.solexgames.queue;
 
 import lombok.experimental.UtilityClass;
+import net.evilblock.cubed.util.CC;
 import org.bukkit.ChatColor;
 
 /**
@@ -11,6 +12,6 @@ import org.bukkit.ChatColor;
 @UtilityClass
 public class QueueBukkitConstants {
 
-    public static final String PREFIX = ChatColor.GOLD + ChatColor.BOLD.toString() + "Queue " + ChatColor.GRAY + ChatColor.BOLD + "»" + " ";
+    public static final String PREFIX = CC.B_PRI + "Queue " + ChatColor.GRAY + ChatColor.BOLD + "»" + " ";
 
 }

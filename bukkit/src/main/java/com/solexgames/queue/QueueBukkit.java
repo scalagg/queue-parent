@@ -1,7 +1,14 @@
 package com.solexgames.queue;
 
+import com.solexgames.core.CorePlugin;
+import com.solexgames.core.server.NetworkServer;
+import com.solexgames.core.util.BungeeUtil;
+import com.solexgames.lib.acf.BaseCommand;
 import com.solexgames.lib.acf.ConditionFailedException;
+import com.solexgames.lib.acf.InvalidCommandArgument;
 import com.solexgames.lib.acf.PaperCommandManager;
+import com.solexgames.lib.acf.annotation.CommandAlias;
+import com.solexgames.lib.acf.annotation.Name;
 import com.solexgames.lib.commons.redis.JedisBuilder;
 import com.solexgames.lib.commons.redis.JedisManager;
 import com.solexgames.lib.processor.config.ConfigFactory;
@@ -15,7 +22,6 @@ import com.solexgames.queue.commons.model.impl.CachedQueuePlayer;
 import com.solexgames.queue.commons.platform.QueuePlatform;
 import com.solexgames.queue.commons.platform.QueuePlatforms;
 import com.solexgames.queue.commons.queue.impl.ParentQueue;
-import com.solexgames.queue.commons.scheme.NamingScheme;
 import com.solexgames.queue.handler.FormatterHandler;
 import com.solexgames.queue.handler.PlayerHandler;
 import com.solexgames.queue.handler.QueueHandler;
@@ -30,6 +36,7 @@ import me.lucko.helper.Schedulers;
 import me.lucko.helper.plugin.ExtendedJavaPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -120,11 +127,26 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
 
         commandManager.getCommandCompletions().registerAsyncCompletion("schemes", context -> schemeNames);
 
+        commandManager.getCommandContexts().registerContext(NetworkServer.class, c -> {
+            final String firstArg = c.getFirstArg();
+            NetworkServer server = firstArg != null ? NetworkServer.getByName(firstArg) : null;
+
+            if (server != null) {
+                c.popFirstArg();
+            }
+            if (server == null) {
+                throw new InvalidCommandArgument("There is server with with the name " + ChatColor.YELLOW + firstArg + ChatColor.RED + ".");
+            }
+
+            return server;
+        });
+
         commandManager.registerDependency(QueueBukkitSettings.class, this.settings);
 
         commandManager.registerCommand(new JoinQueueCommand());
         commandManager.registerCommand(new LeaveQueueCommand());
         commandManager.registerCommand(new QueueMetaCommand());
+        commandManager.registerCommand(new JoinCommand());
 
         this.formatterHandler = new FormatterHandler(this.settings);
     }
@@ -199,5 +221,30 @@ public final class QueueBukkit extends ExtendedJavaPlugin implements QueuePlatfo
         this.jedisManager.runCommand(jedis -> {
             jedis.hdel(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE, this.settingsProvider.getServerName());
         });
+    }
+
+    private static class JoinCommand extends BaseCommand {
+
+        @CommandAlias("join")
+        public void execute(Player player, @Name("server") NetworkServer server) {
+            if (CorePlugin.getInstance().getServerName().equalsIgnoreCase(server.getServerName())) {
+                throw new ConditionFailedException("You're already connected to " + ChatColor.YELLOW + server.getServerName() + ChatColor.RED + ".");
+            }
+
+            if (server.isWhitelistEnabled() /* && server.getWhitelistedPlayers().contains(player.getName()) */) {
+                throw new ConditionFailedException("That server is currently whitelisted.");
+            }
+
+            final ParentQueue parentQueue = QueueBukkit.getInstance().getQueueHandler()
+                    .getParentQueueMap().get(server.getServerName());
+
+            if (parentQueue != null && !player.isOp()) {
+                throw new ConditionFailedException("You don't have permission to join " + ChatColor.YELLOW + server.getServerName() + ChatColor.RED + ".");
+            }
+
+            player.sendMessage(ChatColor.YELLOW + "Joining " + ChatColor.GOLD + server.getServerName() + ChatColor.YELLOW + "...");
+
+            BungeeUtil.sendToServer(player, server.getServerName(), CorePlugin.getInstance());
+        }
     }
 }

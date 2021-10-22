@@ -21,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
  */
 
 @CommandAlias("leavequeue|leaveq")
+@CommandPermission("queue.command.leavequeue")
 public class LeaveQueueCommand extends BaseCommand {
 
     @Dependency
