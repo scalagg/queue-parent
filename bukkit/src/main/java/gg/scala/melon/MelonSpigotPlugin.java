@@ -6,6 +6,7 @@ import gg.scala.banana.handler.impl.DefaultExceptionHandler;
 import gg.scala.banana.options.BananaOptions;
 import gg.scala.commons.ExtendedScalaPlugin;
 import gg.scala.lemon.Lemon;
+import gg.scala.lemon.LemonConstants;
 import gg.scala.melon.adapter.MelonMessageHandler;
 import gg.scala.melon.cache.NamingSchemeCache;
 import gg.scala.melon.command.JoinQueueCommand;
@@ -113,8 +114,16 @@ public final class MelonSpigotPlugin extends ExtendedScalaPlugin implements Queu
 
         commandManager.registerDependency(QueueBukkitSettings.class, this.settings);
 
-        commandManager.registerCommand(new JoinQueueCommand());
-        commandManager.registerCommand(new LeaveQueueCommand());
+        if (LemonConstants.getLOBBY())
+        {
+            commandManager.registerCommand(new JoinQueueCommand());
+            commandManager.registerCommand(new LeaveQueueCommand());
+        } else
+        {
+            Lemon.getInstance().getLocalInstance()
+                    .getMetaData().put("joinable", "false");
+        }
+
         commandManager.registerCommand(new QueueMetaCommand());
 
         this.formatterHandler = new FormatterHandler(this.settings);
