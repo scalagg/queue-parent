@@ -119,11 +119,12 @@ public class MelonMessageHandler implements BananaHandler {
                         player.sendMessage(ChatColor.GREEN + "You're now being sent to " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.GREEN + ".");
 
                         CompletableFuture.runAsync(() -> {
-                            final Message message = new Message("SEND_SERVER");
-                            message.set("PLAYER", queuePlayer.getName());
-                            message.set("SERVER", parentQueue.getTargetServer());
+                            final Message message = new Message("send-server");
+                            message.set("uuid", queuePlayer.getUniqueId().toString());
+                            message.set("server", parentQueue.getTargetServer());
 
                             message.dispatch(
+                                    "cocoa",
                                     MelonSpigotPlugin.getInstance().getJedisManager()
                             );
                         }).whenComplete((unused, throwable) -> {
