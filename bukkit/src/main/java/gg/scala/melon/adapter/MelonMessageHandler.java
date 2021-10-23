@@ -10,6 +10,7 @@ import gg.scala.melon.commons.model.server.ServerData;
 import gg.scala.melon.commons.platform.QueuePlatforms;
 import gg.scala.melon.commons.queue.impl.ParentQueue;
 import gg.scala.melon.commons.queue.impl.child.ChildQueue;
+import net.evilblock.cubed.util.bungee.BungeeUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -118,16 +119,7 @@ public class MelonMessageHandler implements BananaHandler {
                     if (player != null) {
                         player.sendMessage(ChatColor.GREEN + "You're now being sent to " + ChatColor.YELLOW + parentQueue.getFancyName() + ChatColor.GREEN + ".");
 
-                        final Message message = new Message("send-server");
-                        message.set("uuid", queuePlayer.getUniqueId().toString());
-                        message.set("server", parentQueue.getTargetServer());
-
-                        message.dispatch(
-                                "cocoa",
-                                MelonSpigotPlugin.getInstance().getJedisManager()
-                        );
-
-                        System.out.println("sending message");
+                        BungeeUtil.sendToServer(player, parentQueue.getTargetServer());
                     }
                 }
             }
