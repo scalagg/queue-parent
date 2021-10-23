@@ -126,6 +126,8 @@ public class MelonMessageHandler implements BananaHandler {
                                 "cocoa",
                                 MelonSpigotPlugin.getInstance().getJedisManager()
                         );
+
+                        System.out.println("sending message");
                     }
                 }
             }
