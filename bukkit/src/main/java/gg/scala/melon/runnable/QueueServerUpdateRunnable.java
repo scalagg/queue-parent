@@ -34,7 +34,7 @@ public class QueueServerUpdateRunnable implements Runnable {
 
             this.serverData.setMaxPlayers(Bukkit.getMaxPlayers());
             this.serverData.setOnlinePlayers(Bukkit.getOnlinePlayers().size());
-            this.serverData.setWhitelisted(Lemon.getCanJoin() && this.isWhitelistEnabled());
+            this.serverData.setWhitelisted(!Lemon.getCanJoin() || this.isWhitelistEnabled());
             this.serverData.setWhitelistedPlayers(whitelistedPlayers);
             this.serverData.setLastUpdate(System.currentTimeMillis());
 
