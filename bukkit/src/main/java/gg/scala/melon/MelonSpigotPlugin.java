@@ -114,7 +114,7 @@ public final class MelonSpigotPlugin extends ExtendedScalaPlugin implements Queu
 
         commandManager.registerDependency(QueueBukkitSettings.class, this.settings);
 
-        if (LemonConstants.getLOBBY())
+        if (Lemon.getInstance().getSettings().getId().contains("hub"))
         {
             commandManager.registerCommand(new JoinQueueCommand());
         } else
