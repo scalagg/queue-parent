@@ -117,10 +117,9 @@ public final class MelonSpigotPlugin extends ExtendedScalaPlugin implements Queu
         if (Lemon.getInstance().getSettings().getId().contains("hub"))
         {
             commandManager.registerCommand(new JoinQueueCommand());
-        } else
-        {
-            commandManager.registerCommand(new LeaveQueueCommand());
         }
+
+        commandManager.registerCommand(new LeaveQueueCommand());
 
         Lemon.getInstance().getLocalInstance()
                 .getMetaData().put("joinable", "false");
