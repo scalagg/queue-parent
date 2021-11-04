@@ -8,6 +8,7 @@ import gg.scala.banana.message.Message;
 import gg.scala.banana.options.BananaOptions;
 import gg.scala.cocoa.CocoaProxyPlugin;
 import gg.scala.melon.adapter.JedisAdapter;
+import gg.scala.melon.adapter.RedisBungeeListener;
 import gg.scala.melon.commons.constants.QueueGlobalConstants;
 import gg.scala.melon.commons.logger.QueueLogger;
 import gg.scala.melon.commons.platform.QueuePlatform;
@@ -87,6 +88,8 @@ public final class MelonProxyPlugin extends Plugin implements QueuePlatform {
 
             QueueLogger.log("Setup queue by the name " + parentQueue.getName() + ".");
         });
+
+        this.getProxy().getPluginManager().registerListener(this, new RedisBungeeListener());
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> this.shouldBroadcast = false));
     }

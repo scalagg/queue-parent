@@ -88,6 +88,13 @@
             <systemPath>${basedir}/lib/Cocoa.jar</systemPath>
         </dependency>
         <dependency>
+            <groupId>gg.scala</groupId>
+            <artifactId>redisbungee</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/RedisBungee-0.5.jar</systemPath>
+        </dependency>
+        <dependency>
             <groupId>net.evilblock</groupId>
             <artifactId>cubed</artifactId>
             <version>1.0</version>
