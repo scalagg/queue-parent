@@ -81,6 +81,8 @@ public class QueueSendRunnable implements Runnable {
                     }
                 });
             });
+        }).whenComplete((d, c) -> {
+            c.printStackTrace();
         });
     }
 }

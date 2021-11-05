@@ -70,7 +70,6 @@ public class QueueHandler implements IQueueHandler {
                 final String jedisValue = jedis.hget(QueueGlobalConstants.JEDIS_KEY_SERVER_DATA_CACHE, serverName);
 
                 serverDataAtomicReference.set(QueueGlobalConstants.GSON.fromJson(jedisValue, ServerData.class));
-                return null;
             });
 
             return serverDataAtomicReference.get();

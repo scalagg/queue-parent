@@ -23,6 +23,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
+import redis.clients.jedis.Jedis;
 
 import java.io.File;
 import java.util.concurrent.Executors;
@@ -80,7 +81,6 @@ public final class MelonProxyPlugin extends Plugin implements QueuePlatform {
         this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
             this.jedisManager.useResource(jedis -> {
                 jedis.hset(QueueGlobalConstants.JEDIS_KEY_SETTING_CACHE, parentQueue.getName(), QueueGlobalConstants.GSON.toJson(parentQueue.getSettings()));
-                return null;
             });
 
             QueueLogger.log("Setup queue by the name " + parentQueue.getName() + ".");
