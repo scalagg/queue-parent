@@ -39,9 +39,6 @@ public final class MelonProxyPlugin extends Plugin implements QueuePlatform {
     private QueueHandler queueHandler;
 
     private Banana jedisManager;
-    private Banana xenonJedisManager;
-
-    private boolean shouldBroadcast = true;
 
     @Override
     @SneakyThrows
@@ -90,20 +87,19 @@ public final class MelonProxyPlugin extends Plugin implements QueuePlatform {
         });
 
         this.getProxy().getPluginManager().registerListener(this, new RedisBungeeListener());
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> this.shouldBroadcast = false));
     }
 
     private void setupTaskSubscriptions() {
         final ScheduledExecutorService broadcast = Executors.newScheduledThreadPool(1);
+        final Message broadcastPacket = new Message("QUEUE_BROADCAST_ALL");
+
         broadcast.scheduleAtFixedRate(() -> {
-            if (this.shouldBroadcast) {
-                new Message("QUEUE_BROADCAST_ALL").dispatch(this.jedisManager);
-            }
+            broadcastPacket.dispatch(this.jedisManager);
         }, 0L, 5L, TimeUnit.SECONDS);
 
         ProxyServer.getInstance().getScheduler().schedule(
-                this, new QueueSendRunnable(this.queueHandler), 0L, 20L, TimeUnit.MILLISECONDS
+                this, new QueueSendRunnable(this.queueHandler),
+                0L, 250L, TimeUnit.MILLISECONDS
         );
     }
 }
