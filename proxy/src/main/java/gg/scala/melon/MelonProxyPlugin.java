@@ -94,12 +94,11 @@ public final class MelonProxyPlugin extends Plugin implements QueuePlatform {
         final Message broadcastPacket = new Message("QUEUE_BROADCAST_ALL");
 
         broadcast.scheduleAtFixedRate(() -> {
-            broadcastPacket.dispatch(this.jedisManager);
+            this.jedisManager.useResource(jedis -> {
+                jedis.publish("queue_global", Serializers.getGson().toJson(broadcastPacket));
+            });
         }, 0L, 5L, TimeUnit.SECONDS);
 
-        ProxyServer.getInstance().getScheduler().schedule(
-                this, new QueueSendRunnable(this.queueHandler),
-                0L, 250L, TimeUnit.MILLISECONDS
-        );
+        new QueueSendRunnable(this.queueHandler).start();
     }
 }

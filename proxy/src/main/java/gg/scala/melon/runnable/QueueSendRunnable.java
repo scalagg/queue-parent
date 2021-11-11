@@ -18,13 +18,13 @@ import java.util.concurrent.CompletableFuture;
  */
 
 @RequiredArgsConstructor
-public class QueueSendRunnable implements Runnable {
+public class QueueSendRunnable extends Thread {
 
     private final QueueHandler queueHandler;
 
     @Override
     public void run() {
-        CompletableFuture.runAsync(() -> {
+        try {
             this.queueHandler.getParentQueueMap().forEach((s, parentQueue) -> {
                 final CompletableFuture<ServerData> serverDataCompletableFuture = MelonProxyPlugin.getInstance()
                         .getQueueHandler().fetchServerData(parentQueue.getTargetServer());
@@ -81,8 +81,15 @@ public class QueueSendRunnable implements Runnable {
                     }
                 });
             });
-        }).whenComplete((d, c) -> {
-            c.printStackTrace();
-        });
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        try {
+            sleep(150L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
