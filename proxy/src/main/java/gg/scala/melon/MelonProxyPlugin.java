@@ -99,6 +99,9 @@ public final class MelonProxyPlugin extends Plugin implements QueuePlatform {
             });
         }, 0L, 5L, TimeUnit.SECONDS);
 
-        new QueueSendRunnable(this.queueHandler).start();
+        broadcast.scheduleAtFixedRate(
+                new QueueSendRunnable(this.queueHandler),
+                0L, 150L, TimeUnit.MILLISECONDS
+        );
     }
 }

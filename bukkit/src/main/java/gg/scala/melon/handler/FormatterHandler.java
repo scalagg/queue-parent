@@ -28,7 +28,7 @@ public class FormatterHandler {
     }
 
     public void sendCannotJoinMessageToPlayer(Player player, CachedQueuePlayer queuePlayer, ChildQueue childQueue, String reason) {
-        for (final String message : this.bukkitSettings.getCanJoinQueueMessage()) {
+        for (final String message : this.bukkitSettings.getCannotJoinQueueMessage()) {
             player.sendMessage(message
                     .replace("<name>", childQueue.getParent().getFancyName())
                     .replace("<server_status>", reason)
